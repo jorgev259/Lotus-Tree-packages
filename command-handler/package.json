@@ -1,0 +1,7 @@
+{
+  "name": "command-handler",
+  "packageManager": "yarn@3.0.0",
+  "dependencies": {
+    "sequelize": "^6.6.5"
+  }
+}

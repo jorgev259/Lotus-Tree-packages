@@ -1,0 +1,9 @@
+{
+  "name": "fxtwitter",
+  "packageManager": "yarn@3.0.0",
+  "dependencies": {
+    "get-urls": "^10.0.0",
+    "promise-all-forgiving": "^1.0.2",
+    "twitter": "^1.7.1"
+  }
+}

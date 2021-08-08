@@ -61,9 +61,9 @@ module.exports = {
       guilds.forEach(guild => checkGuild(guild.id, sequelize, modules, commands, config))
     },
     async messageCreate (global, message) {
-      if (!message.member) return
+      const { client, commands, modules, config } = global
+      if (message.author.id === client.user.id || !message.member) return
 
-      const { commands, modules, config } = global
       const guildId = message.guildId
       const { prefix } = config[guildId]
 

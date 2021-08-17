@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <style>
+        body{
+            background-color: black 
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+        function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+                vars[key] = value;
+            });
+            return vars;
+        }
+
+        window.twttr.widgets.createTweet(
+            getUrlVars()['id'],
+            document.getElementById('container'),
+            {
+                theme: 'dark',
+                width: 550
+            }
+        ).then(function (el) {
+            window.renderable = "ready"
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "@lotus-tree/twitterbotglobal",
+  "packageManager": "yarn@3.0.0",
+  "version": "1.0.0",
+  "dependencies": {
+    "discord.js": "^13.1.0",
+    "fs-extra": "^10.0.0",
+    "lodash": "^4.17.21",
+    "puppeteer": "^10.2.0",
+    "twitter": "^1.7.1"
+  }
+}

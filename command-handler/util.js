@@ -2,8 +2,8 @@ const orderCategory = ['user', 'role', 'channel']
 const orderType = ['deny', 'allow']
 
 module.exports = {
-  async permCheck (command, message, { config, sequelize }) {
-    if (command.ownerOnly) return config.ownerIds.includes(message.author.id)
+  async permCheck (command, message, { configFile, sequelize }) {
+    if (command.ownerOnly) return configFile.ownerIds.includes(message.author.id)
 
     const rows = (await sequelize.models.perm.findAll({ where: { command: command.name } }))
       .sort((a, b) =>

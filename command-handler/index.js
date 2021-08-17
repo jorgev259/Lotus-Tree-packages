@@ -2,17 +2,23 @@ const { DataTypes } = require('sequelize')
 const { STRING, BOOLEAN } = DataTypes
 const { permCheck } = require('./util')
 
-async function checkGuild (guild, sequelize, modules, commands, config) {
+async function checkGuild (guild, sequelize, modules, commands, config, defaultConfig) {
   if (!config[guild]) config[guild] = {}
+  if (!config.global) config.global = {}
+
+  for (const [item, value] of Object.entries(defaultConfig.global)) {
+    const [row] = await sequelize.models.config.findOrCreate({ where: { guild: 'global', item }, defaults: { value } })
+    config.global[item] = row.value
+  }
+
+  for (const [item, value] of Object.entries(defaultConfig.guild)) {
+    const [row] = await sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
+    config[guild][item] = row.value
+  }
 
   for (const module of modules.values()) {
     const [{ value }] = await sequelize.models.module.findOrCreate({ where: { guild, module: module.name } })
     module.enabled[guild] = value
-
-    for (const [item, value] of Object.entries(module.config)) {
-      const [row] = await sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
-      config[guild][item] = row.value
-    }
   }
 
   for (const command of commands.values()) {
@@ -22,13 +28,14 @@ async function checkGuild (guild, sequelize, modules, commands, config) {
 }
 
 module.exports = {
-  config: { prefix: '>' },
+  name: 'command-handler',
+  config: { guild: { prefix: '>' } },
   commands: require('./commands'),
   events: {
-    async guildCreate ({ sequelize, modules, commands, config }, guild) {
-      await checkGuild(guild.id, sequelize, modules, commands, config)
+    async guildCreate ({ sequelize, modules, commands, config, defaultConfig }, guild) {
+      await checkGuild(guild.id, sequelize, modules, commands, config, defaultConfig)
     },
-    async ready ({ client, sequelize, commands, modules, config }) {
+    async ready ({ client, sequelize, commands, modules, config, defaultConfig }) {
       sequelize.define('config', {
         guild: { type: STRING, unique: 'index' },
         item: { type: STRING, unique: 'index' },
@@ -58,7 +65,7 @@ module.exports = {
       await sequelize.sync()
 
       const guilds = await client.guilds.fetch()
-      guilds.forEach(guild => checkGuild(guild.id, sequelize, modules, commands, config))
+      guilds.forEach(guild => checkGuild(guild.id, sequelize, modules, commands, config, defaultConfig))
     },
     async messageCreate (global, message) {
       const { client, commands, modules, config } = global

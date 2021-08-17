@@ -1,6 +1,7 @@
 {
-  "name": "command-handler",
+  "name": "@lotus-tree/command-handler",
   "packageManager": "yarn@3.0.0",
+  "version": "1.1.0",
   "dependencies": {
     "sequelize": "^6.6.5"
   }

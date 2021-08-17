@@ -13,7 +13,7 @@ module.exports = {
       const channels = await guild.channels.fetch()
       const channel = channels.get(config[guild.id].tweetChannel)
 
-      channel.send(msg)
+      if (channel) channel.send(msg).catch(err => console.log(`Failed to send message to ${guild.id} - ${config[guild.id].tweetChannel}: ${err}`))
     })
   }
 }

@@ -150,16 +150,12 @@ module.exports = {
       const channels = await guild.channels.fetch()
       let channel = channels.get(config.global.approvalChannel)
 
-      try {
-        if (!channel) {
-          channel = await guild.channels.create(config.global.approvalChannelName)
-          await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
-        }
-
-        await channel.messages.fetch()
-      } catch (err) {
-        console.log(err)
+      if (!channel) {
+        channel = await guild.channels.create(config.global.approvalChannelName)
+        await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
       }
+
+      await channel.messages.fetch()
     }
 
     async function startStream () {
@@ -177,9 +173,14 @@ module.exports = {
 
       const accounts = await Promise.all(
         accountConfig.map(async acc => {
-          const item = await twitterClient.get('users/show', { screen_name: acc.name })
-          acc.id = item.id_str
-          return item
+          try {
+            const item = await twitterClient.get('users/show', { screen_name: acc.name })
+            acc.id = item.id_str
+            return item
+          } catch (err) {
+            console.log(err)
+            return {}
+          }
         })
       )
       const accountList = accounts.map(acc => acc.id_str)

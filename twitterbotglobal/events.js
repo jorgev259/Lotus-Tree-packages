@@ -149,12 +149,16 @@ module.exports = {
       const channels = await guild.channels.fetch()
       let channel = channels.get(config.global.approvalChannel)
 
-      if (!channel) {
-        channel = await guild.channels.create(config.global.approvalChannelName)
-        await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
-      }
+      try {
+        if (!channel) {
+          channel = await guild.channels.create(config.global.approvalChannelName)
+          await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
+        }
 
-      await channel.messages.fetch()
+        await channel.messages.fetch()
+      } catch (err) {
+        console.log(err)
+      }
     }
 
     async function startStream () {

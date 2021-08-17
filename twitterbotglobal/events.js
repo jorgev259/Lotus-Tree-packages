@@ -47,7 +47,7 @@ function evalTweet (client, sequelize, config, tweet, item) {
         const guild = await client.guilds.fetch(config.global.approvalGuild)
         const channels = await guild.channels.fetch()
 
-        channels.find(c => c.name === config.global.approvalChannel)
+        channels.get(config.global.approvalChannel)
           .send({ embeds: [embed], files: [file] }).then(m =>
             m.react('✅').then(() => m.react('❎'))
           )

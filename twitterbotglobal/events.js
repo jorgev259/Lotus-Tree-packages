@@ -165,6 +165,7 @@ module.exports = {
     async function startStream () {
       if (!config.global) return setTimeout(startStream, 5 * 1000)
       await checkApproval()
+        .catch(err => console.log(`Failed to check approval channel: ${err}`))
 
       const guilds = await client.guilds.fetch()
       guilds.forEach(guild => {

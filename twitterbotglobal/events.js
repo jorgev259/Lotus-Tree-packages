@@ -112,6 +112,7 @@ function screenshotTweet (client, id, usePath) {
 module.exports = {
   async guildCreate ({ sequelize, config }, guild) {
     checkGuild(sequelize, config, guild)
+      .catch(err => console.log(`Failed to check guild ${guild.id}: ${err}`))
   },
   async messageReactionAdd ({ client, sequelize, config }, reaction, user) {
     if (user.bot) return
@@ -166,7 +167,10 @@ module.exports = {
       await checkApproval()
 
       const guilds = await client.guilds.fetch()
-      guilds.forEach(guild => checkGuild(sequelize, config, guild))
+      guilds.forEach(guild => {
+        checkGuild(sequelize, config, guild)
+          .catch(err => console.log(`Failed to check guild ${guild.id}: ${err}`))
+      })
 
       console.log('Starting twitter stream')
 

@@ -75,36 +75,36 @@ function screenshotTweet (client, id, usePath) {
 
     async function evalPage () {
       const page = await browser.newPage()
-      page.setViewport({ width: 1000, height: 600, deviceScaleFactor: 5 })
+      await page.setViewport({ width: 1000, height: 600, deviceScaleFactor: 5 })
 
-      page.goto(path.join('file://', __dirname, `index.html?id=${id}`))
+      await page.goto(path.join('file://', __dirname, `index.html?id=${id}`))
       /* .catch(err => {
         // log(client, path.join('file://', __dirname, `index.html?id=${id}`))
         // log(client, err.stack)
       }) */
-      setTimeout(async () => {
-        const rect = await page.evaluate(() => {
-          const element = document.querySelector('#container')
-          const { x, y, width, height } = element.getBoundingClientRect()
-          return { left: x, top: y, width, height, id: element.id }
-        })
-        const screenOptions = {
-          clip: {
-            x: rect.left,
-            quality: 85,
-            y: rect.top,
-            width: 550,
-            height: rect.height
-          }
+
+      await page.waitForFunction('window.status === "ready"')
+      const rect = await page.evaluate(() => {
+        const element = document.querySelector('#container')
+        const { x, y, width, height } = element.getBoundingClientRect()
+        return { left: x, top: y, width, height, id: element.id }
+      })
+      const screenOptions = {
+        clip: {
+          x: rect.left,
+          quality: 85,
+          y: rect.top,
+          width: 550,
+          height: rect.height
         }
+      }
 
-        fs.ensureDirSync('temp')
-        if (usePath) screenOptions.path = `temp/${id}.png`
+      fs.ensureDirSync('temp')
+      if (usePath) screenOptions.path = `temp/${id}.png`
 
-        const buffer = await page.screenshot(screenOptions)
-        await page.close()
-        resolve(buffer)
-      }, 30 * 1000)
+      const buffer = await page.screenshot(screenOptions)
+      await page.close()
+      resolve(buffer)
     }
   })
 }

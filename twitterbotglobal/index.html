@@ -28,7 +28,10 @@
                 width: 550
             }
         ).then(function (el) {
-            window.renderable = "ready"
+            setTimeout(()=> {
+                console.log('ready')
+                window.status = "ready"
+            }, 1 * 1000)    
         })
     </script>
 </body>

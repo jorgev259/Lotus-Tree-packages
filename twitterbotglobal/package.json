@@ -1,7 +1,7 @@
 {
   "name": "@lotus-tree/twitterbotglobal",
   "packageManager": "yarn@3.0.0",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "dependencies": {
     "discord.js": "^13.1.0",
     "easy-promise-queue": "^0.5.7",

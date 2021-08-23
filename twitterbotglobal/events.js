@@ -33,7 +33,8 @@ async function evalTweet (client, sequelize, config, tweet, item) {
   const url = `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}/`
   console.log(`Evaluating ${url}`)
 
-  const { type } = item
+  let { type } = item
+  if (tweet.in_reply_to_status_id) type = 'approval'
   const [row, created] = await sequelize.models.globalTweet
     .findOrCreate({ where: { account: tweet.user.screen_name }, defaults: { tweet: tweet.id_str, timestamp: tweet.timestamp_ms } })
 

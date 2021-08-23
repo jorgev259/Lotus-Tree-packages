@@ -1,9 +1,13 @@
-const Twitter = require('twitter')
+const Twitter = require('twitter-lite')
 const path = require('path')
 const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { MessageAttachment } = require('discord.js')
+const { DataTypes } = require('sequelize')
+const PromiseQueue = require('easy-promise-queue').default
+const pq = new PromiseQueue({ concurrency: 1 })
+
 const { updateConfig, postTweet } = require('./util')
 
 let browser
@@ -25,43 +29,51 @@ async function checkGuild (sequelize, config, partialGuild) {
   }
 }
 
-function evalTweet (client, sequelize, config, tweet, item) {
-  const { type } = item
-
+async function evalTweet (client, sequelize, config, tweet, item) {
   const url = `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}/`
+  console.log(`Evaluating ${url}`)
 
-  screenshotTweet(client, tweet.id_str, type === 'approval').then(async shotBuffer => {
-    switch (type) {
-      case 'approval': {
-        const file = new MessageAttachment(shotBuffer, ' imageTweet.png')
-        const embed = {
-          author: { name: `${tweet.user.name} | ${tweet.user.screen_name}`, icon_url: tweet.user.profile_image_url },
-          color: tweet.user.profile_background_color,
-          timestamp: new Date(),
-          fields: [{ name: 'URL', value: url }],
-          image: {
-            url: 'attachment://imageTweet.png'
-          }
+  const { type } = item
+  const [row, created] = await sequelize.models.globalTweet
+    .findOrCreate({ where: { account: tweet.user.screen_name }, defaults: { tweet: tweet.id_str, timestamp: tweet.timestamp_ms } })
+
+  if (!created && row.timestamp < tweet.timestamp_ms) {
+    row.tweet = tweet.id_str
+    row.timestamp = tweet.timestamp_ms
+    await row.save()
+  }
+
+  const shotBuffer = await screenshotTweet(client, tweet.id_str, type === 'approval')
+  switch (type) {
+    case 'approval': {
+      const file = new MessageAttachment(shotBuffer, ' imageTweet.png')
+      const embed = {
+        author: { name: `${tweet.user.name} | ${tweet.user.screen_name}`, icon_url: tweet.user.profile_image_url },
+        color: tweet.user.profile_background_color,
+        timestamp: new Date(),
+        fields: [{ name: 'URL', value: url }],
+        image: {
+          url: 'attachment://imageTweet.png'
         }
-
-        const guild = await client.guilds.fetch(config.global.approvalGuild)
-        const channels = await guild.channels.fetch()
-
-        channels.get(config.global.approvalChannel)
-          .send({ embeds: [embed], files: [file] }).then(m =>
-            m.react('✅').then(() => m.react('❎'))
-          )
-        break
       }
 
-      case 'auto': {
-        const msg = { content: `<${url}>`, files: [shotBuffer] }
+      const guild = await client.guilds.fetch(config.global.approvalGuild)
+      const channels = await guild.channels.fetch()
 
-        postTweet(client, sequelize, config, msg)
-        break
-      }
+      channels.get(config.global.approvalChannel)
+        .send({ embeds: [embed], files: [file] }).then(m =>
+          m.react('✅').then(() => m.react('❎'))
+        )
+      break
     }
-  })
+
+    case 'auto': {
+      const msg = { content: `<${url}>`, files: [shotBuffer] }
+
+      postTweet(client, sequelize, config, msg)
+      break
+    }
+  }
 }
 
 function screenshotTweet (client, id, usePath) {
@@ -133,8 +145,50 @@ module.exports = {
   },
 
   async ready ({ client, configFile, config, sequelize }) {
+    sequelize.define('globalTweet', {
+      account: {
+        primaryKey: true,
+        type: DataTypes.STRING
+      },
+      tweet: DataTypes.STRING,
+      timestamp: DataTypes.BIGINT
+    })
+
+    await sequelize.sync()
+
     twitterClient = new Twitter(configFile.twitter)
     const { accounts: accountConfig } = configFile.twitterbot
+
+    const accounts = await Promise.all(
+      accountConfig.map(async acc => {
+        try {
+          const item = await twitterClient.get('users/show', { screen_name: acc.name })
+          acc.id = item.id_str
+          return item
+        } catch (err) {
+          console.log(err)
+          return {}
+        }
+      })
+    )
+    const accountList = accounts.map(acc => acc.id_str)
+
+    const globalTweets = await sequelize.models.globalTweet.findAll()
+
+    await Promise.all(globalTweets.map(async acc => {
+      try {
+        const tweets = await twitterClient.get('statuses/user_timeline', { screen_name: acc.account, since_id: acc.tweet, tweet_mode: 'extended' })
+        tweets.forEach(event => {
+          if (accountList.includes(event.user.id_str)) {
+            const info = accountConfig.find(acc => event.user.id_str === acc.id)
+
+            pq.add(() => evalTweet(client, sequelize, config, event, info))
+          }
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    }))
 
     startStream()
 
@@ -171,28 +225,14 @@ module.exports = {
 
       console.log('Starting twitter stream')
 
-      const accounts = await Promise.all(
-        accountConfig.map(async acc => {
-          try {
-            const item = await twitterClient.get('users/show', { screen_name: acc.name })
-            acc.id = item.id_str
-            return item
-          } catch (err) {
-            console.log(err)
-            return {}
-          }
-        })
-      )
-      const accountList = accounts.map(acc => acc.id_str)
-
       const stream = twitterClient.stream('statuses/filter', { follow: accounts.map(a => a.id_str).join(',') })
-      console.log('Started twitter stream')
 
+      stream.on('start', () => console.log('Started twitter stream'))
       stream.on('data', async function (event) {
         if (isTweet(event) && accountList.includes(event.user.id_str)) {
           const info = accountConfig.find(acc => event.user.id_str === acc.id)
 
-          evalTweet(client, sequelize, config, event, info)
+          pq.add(() => evalTweet(client, sequelize, config, event, info))
         }
       })
 

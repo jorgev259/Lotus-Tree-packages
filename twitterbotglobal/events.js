@@ -1,6 +1,5 @@
 const Twitter = require('twitter-lite')
 const path = require('path')
-const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { MessageAttachment } = require('discord.js')
@@ -10,8 +9,7 @@ const pq = new PromiseQueue({ concurrency: 1 })
 
 const { updateConfig, postTweet } = require('./util')
 
-let browser
-let twitterClient
+let client, sequelize, browser, twitterClient, accounts, accountList, accountConfig
 
 const isTweet = _.conforms({
   id_str: _.isString,
@@ -91,10 +89,6 @@ function screenshotTweet (client, id, usePath) {
       await page.setViewport({ width: 1000, height: 600, deviceScaleFactor: 5 })
 
       await page.goto(path.join('file://', __dirname, `index.html?id=${id}`))
-      /* .catch(err => {
-        // log(client, path.join('file://', __dirname, `index.html?id=${id}`))
-        // log(client, err.stack)
-      }) */
 
       await page.waitForFunction('window.status === "ready"')
       const rect = await page.evaluate(() => {
@@ -112,13 +106,59 @@ function screenshotTweet (client, id, usePath) {
         }
       }
 
-      fs.ensureDirSync('temp')
-      if (usePath) screenOptions.path = `temp/${id}.png`
-
       const buffer = await page.screenshot(screenOptions)
       await page.close()
       resolve(buffer)
     }
+  })
+}
+
+async function checkApproval (config) {
+  const guilds = await client.guilds.fetch()
+
+  if (!guilds.has(config.global.approvalGuild)) {
+    await updateConfig(sequelize, config, 'global', 'approvalGuild', guilds.first().id)
+  }
+
+  const partialGuild = guilds.get(config.global.approvalGuild)
+  const guild = await partialGuild.fetch()
+  const channels = await guild.channels.fetch()
+  let channel = channels.get(config.global.approvalChannel)
+
+  if (!channel) {
+    channel = await guild.channels.create(config.global.approvalChannelName)
+    await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
+  }
+
+  await channel.messages.fetch()
+}
+
+async function startStream (config) {
+  if (!config.global) return setTimeout(startStream, 5 * 1000, config)
+  await checkApproval(config)
+    .catch(err => console.log(`Failed to check approval channel: ${err}`))
+
+  const guilds = await client.guilds.fetch()
+  guilds.forEach(guild => {
+    checkGuild(sequelize, config, guild)
+      .catch(err => console.log(`Failed to check guild ${guild.id}: ${err}`))
+  })
+
+  console.log('Starting twitter stream')
+
+  const stream = twitterClient.stream('statuses/filter', { follow: accounts.map(a => a.id_str).join(',') })
+
+  stream.on('start', () => console.log('Started twitter stream'))
+  stream.on('data', async function (event) {
+    if (isTweet(event) && accountList.includes(event.user.id_str)) {
+      const info = accountConfig.find(acc => event.user.id_str === acc.id)
+
+      pq.add(() => evalTweet(client, sequelize, config, event, info))
+    }
+  })
+
+  stream.on('error', function (error) {
+    throw error
   })
 }
 
@@ -145,7 +185,13 @@ module.exports = {
     }
   },
 
-  async ready ({ client, configFile, config, sequelize }) {
+  async ready (args) {
+    const { configFile, config } = args
+
+    client = args.client
+    sequelize = args.sequelize
+    accountConfig = configFile.twitterbot.accounts
+
     sequelize.define('globalTweet', {
       account: {
         primaryKey: true,
@@ -158,9 +204,8 @@ module.exports = {
     await sequelize.sync()
 
     twitterClient = new Twitter(configFile.twitter)
-    const { accounts: accountConfig } = configFile.twitterbot
 
-    const accounts = await Promise.all(
+    accounts = await Promise.all(
       accountConfig.map(async acc => {
         try {
           const item = await twitterClient.get('users/show', { screen_name: acc.name })
@@ -172,7 +217,7 @@ module.exports = {
         }
       })
     )
-    const accountList = accounts.map(acc => acc.id_str)
+    accountList = accounts.map(acc => acc.id_str)
 
     const globalTweets = await sequelize.models.globalTweet.findAll()
 
@@ -191,55 +236,6 @@ module.exports = {
       }
     }))
 
-    startStream()
-
-    async function checkApproval () {
-      const guilds = await client.guilds.fetch()
-
-      if (!guilds.has(config.global.approvalGuild)) {
-        await updateConfig(sequelize, config, 'global', 'approvalGuild', guilds.first().id)
-      }
-
-      const partialGuild = guilds.get(config.global.approvalGuild)
-      const guild = await partialGuild.fetch()
-      const channels = await guild.channels.fetch()
-      let channel = channels.get(config.global.approvalChannel)
-
-      if (!channel) {
-        channel = await guild.channels.create(config.global.approvalChannelName)
-        await updateConfig(sequelize, config, 'global', 'approvalChannel', channel.id)
-      }
-
-      await channel.messages.fetch()
-    }
-
-    async function startStream () {
-      if (!config.global) return setTimeout(startStream, 5 * 1000)
-      await checkApproval()
-        .catch(err => console.log(`Failed to check approval channel: ${err}`))
-
-      const guilds = await client.guilds.fetch()
-      guilds.forEach(guild => {
-        checkGuild(sequelize, config, guild)
-          .catch(err => console.log(`Failed to check guild ${guild.id}: ${err}`))
-      })
-
-      console.log('Starting twitter stream')
-
-      const stream = twitterClient.stream('statuses/filter', { follow: accounts.map(a => a.id_str).join(',') })
-
-      stream.on('start', () => console.log('Started twitter stream'))
-      stream.on('data', async function (event) {
-        if (isTweet(event) && accountList.includes(event.user.id_str)) {
-          const info = accountConfig.find(acc => event.user.id_str === acc.id)
-
-          pq.add(() => evalTweet(client, sequelize, config, event, info))
-        }
-      })
-
-      stream.on('error', function (error) {
-        throw error
-      })
-    }
+    startStream(config)
   }
 }

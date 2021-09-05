@@ -1,7 +1,7 @@
 {
     "name": "@lotus-tree/saucenao",
     "packageManager": "yarn@3.0.0",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "dependencies": {
         "get-urls": "^10.0.0",
         "saucenao": "https://github.com/jorgev259/saucenao-node",

@@ -7,7 +7,7 @@ Discord bot that finds possible sources of art or images posted using [SauceNAO]
 ## Commands
 \>enablesauce: Enables the bot on the current channel
 
-\>isablesauce: Disables the bot on the current channel
+\>disablesauce: Disables the bot on the current channel
 
 ## Add to your server
 Use [this link](https://discord.com/oauth2/authorize?client_id=735627177587900518&scope=bot&permissions=3072) to add this bot to your Discord server

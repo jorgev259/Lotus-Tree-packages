@@ -3,6 +3,7 @@ const { STRING } = DataTypes
 
 module.exports = {
   name: 'saucenao',
+  config: { guild: { saucescore: '70' } },
   preload (sequelize) {
     sequelize.define('saucenao', {
       guild: {

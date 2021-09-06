@@ -3,9 +3,9 @@ const getUrls = require('get-urls')
 
 let mySauce
 
-function handleFetch (msg, url) {
+function handleFetch (msg, url, score) {
   mySauce(url).then(response => {
-    const results = response.json.results.filter(e => parseFloat(e.header.similarity) > 70).sort((a, b) => a - b)
+    const results = response.json.results.filter(e => parseFloat(e.header.similarity) >= score).sort((a, b) => a - b)
     if (results.length) {
       msg.channel.send(`Found source: ${results.map(e =>
           e.data.pixiv_id
@@ -45,9 +45,10 @@ module.exports = {
     if (!mySauce) mySauce = new SauceNAO(configFile.saucenao)
 
     if (!config[message.guild.id].saucenao.has(message.channel.id) || message.author.bot) return
-    if (message.attachments.size > 0) message.attachments.forEach(attach => handleFetch(message, attach.url))
+    const saucescore = parseInt(config[message.guild.id].saucescore)
+    if (message.attachments.size > 0) message.attachments.forEach(attach => handleFetch(message, attach.url, saucescore))
 
     const urls = getUrls(message.content)
-    if (urls.size > 0) for (const url of urls) handleFetch(message, url)
+    if (urls.size > 0) for (const url of urls) handleFetch(message, url, saucescore)
   }
 }

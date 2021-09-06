@@ -1,11 +1,13 @@
 module.exports = {
   about: {
     desc: 'Info about the bot',
-    async execute (global, { message }) {
+    async execute ({ client, configFile }, { message }) {
       message.channel.send({
         embeds: [{
           title: 'About',
-          description: 'Powered by [Lotus Tree](https://github.com/jorgev259/Lotus-Tree) (Source code available).\nReport any issues on [this link](https://github.com/jorgev259/Lotus-Tree/issues).\n\n[Add me to your server!](https://discordapp.com/oauth2/authorize?client_id=477560851172294657&scope=bot&permissions=1)',
+          description: `Powered by [Lotus Tree](https://github.com/jorgev259/Lotus-Tree) (Source code available).
+          Report any issues on [this link](https://github.com/jorgev259/Lotus-Tree/issues).\n
+          ${client.application.botPublic ? `[Add me to your server!](https://discordapp.com/oauth2/authorize?client_id=${client.application.id}&scope=bot&permissions=${configFile.permissions})` : ''}`,
           color: 16150617,
           thumbnail: {
             url: 'https://pbs.twimg.com/profile_images/1178168868348542976/nGgmZHKv_400x400.jpg'
@@ -17,7 +19,7 @@ module.exports = {
             },
             {
               name: 'Throw me a bone! or something',
-              value: '[Paypal](https://paypal.me/chitothelickeddorito) or [Ko-Fi](https://Ko-fi.com/E1E8I3VN)'
+              value: '[Paypal](https://paypal.me/chitowarlock) or [Ko-Fi](https://Ko-fi.com/E1E8I3VN)'
             }
           ]
         }]

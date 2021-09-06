@@ -22,7 +22,12 @@ module.exports = {
           const keys = (await sequelize.models.config.findAll({ attributes: ['item'], group: 'item' })).map(c => c.item).join('/')
           const usage = command.usage ? command.usage.replace('lotus-configs', keys) : ''
 
-          return `${command.desc}.${command.usage ? `\nUsage: ${prefix}${usage}\nExample: ${prefix}${command.example}` : ''}${channelPerms.length > 0 ? `\n(Usable on: ${channelPerms.map(e => `#${e.name}`).join(' ')})` : ''}`
+          let result = `${command.desc}.`
+          if (command.usage) result += `\nUsage: ${prefix}${usage}`
+          if (command.example) result += `\nExample: ${prefix}${command.example}`
+          if (channelPerms.length > 0) result += `\n(Usable on: ${channelPerms.map(e => `#${e.name}`).join(' ')})`
+
+          return result
         }
       }
 

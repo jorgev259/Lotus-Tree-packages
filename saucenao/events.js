@@ -29,12 +29,12 @@ module.exports = {
     guilds.forEach(guild => {
       if (!config[guild.id]) config[guild.id] = { saucenao: new Set() }
       else if (!config[guild.id].saucenao) config[guild.id].saucenao = new Set()
-
-      sequelize.models.saucenao.findAll()
-        .then(rows => {
-          rows.forEach(({ guild, channel }) => config[guild].saucenao.add(channel))
-        })
     })
+
+    sequelize.models.saucenao.findAll()
+      .then(rows => {
+        rows.forEach(({ guild, channel }) => config[guild].saucenao.add(channel))
+      })
   },
   async messageCreate ({ config, client, configFile }, message) {
     if (!mySauce) mySauce = new SauceNAO(configFile.saucenao)

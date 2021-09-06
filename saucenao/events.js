@@ -5,7 +5,7 @@ let mySauce
 
 function handleFetch (msg, url) {
   mySauce(url).then(response => {
-    const results = response.json.results.filter(e => parseFloat(e.header.similarity) > 80).sort((a, b) => a - b)
+    const results = response.json.results.filter(e => parseFloat(e.header.similarity) > 70).sort((a, b) => a - b)
     if (results.length) {
       msg.channel.send(`Found source: ${results.map(e =>
           e.data.pixiv_id

@@ -4,6 +4,7 @@ module.exports = {
   help: {
     usage: 'help [command]',
     desc: 'This command displays information about a command',
+    example: 'help perms',
     async execute (globals, { message }) {
       const { config, param, commands, sequelize } = globals
       const { prefix } = config[message.guild.id]
@@ -17,7 +18,11 @@ module.exports = {
               type: 'allow', category: 'channel', command: command.name, guild: message.guild.id
             }
           })
-          return `${command.desc}.${command.usage ? `\nUsage: ${prefix}${command.usage}` : ''}${channelPerms.length > 0 ? `\n(Usable on: ${channelPerms.map(e => `#${e.name}`).join(' ')})` : ''}`
+
+          const keys = (await sequelize.models.config.findAll({ attributes: ['item'], group: 'item' })).map(c => c.item).join('/')
+          const usage = command.usage ? command.usage.replace('lotus-configs', keys) : ''
+
+          return `${command.desc}.${command.usage ? `\nUsage: ${prefix}${usage}\nExample: ${prefix}${command.example}` : ''}${channelPerms.length > 0 ? `\n(Usable on: ${channelPerms.map(e => `#${e.name}`).join(' ')})` : ''}`
         }
       }
 
@@ -71,8 +76,9 @@ module.exports = {
   },
 
   perms: {
-    desc: 'Adds, removes or lists permissions to a command',
+    desc: 'Adds a permission entry to a command',
     usage: 'perms [command name] <allow/deny> <@user|roleName|#channel>',
+    example: 'perms config allow Staff',
     async execute ({ sequelize, param, commands }, { message }) {
       if (param.length < 4) return message.channel.send('Not enough parameters.')
 
@@ -128,6 +134,7 @@ module.exports = {
   toggle: {
     usage: 'toggle [module/command] [command name]',
     desc: 'Enables or disables a command/module',
+    example: 'toggle command about',
     async execute ({ client, param, sequelize, commands, modules }, { message }) {
       if (!param[2] || !['module', 'command'].includes(param[1].toLowerCase())) return message.channel.send('Usage: toggle [module/command] [name]')
 
@@ -164,8 +171,9 @@ module.exports = {
   },
 
   config: {
-    usage: 'config [option] [value]',
+    usage: 'config [lotus-configs] [value]',
     desc: 'Changes a bot configuration',
+    example: 'config prefix >',
     async execute ({ param, sequelize, config }, { message }) {
       const item = param[1].toLowerCase()
       const keys = (await sequelize.models.config.findAll({ attributes: ['item'], group: 'item' })).map(c => c.item)

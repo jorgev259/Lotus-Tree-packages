@@ -2,27 +2,27 @@ const { DataTypes } = require('sequelize')
 const { STRING, BOOLEAN } = DataTypes
 const { permCheck } = require('./util')
 
-async function checkGuild (guild, { sequelize, modules, commands, config, defaultConfig }) {
-  if (!config[guild]) config[guild] = {}
-  if (!config.global) config.global = {}
+async function checkGuild (guild, globals) {
+  if (!globals.config[guild]) globals.config[guild] = {}
+  if (!globals.config.global) globals.config.global = {}
 
-  for (const [item, value] of Object.entries(defaultConfig.global)) {
-    const [row] = await sequelize.models.config.findOrCreate({ where: { guild: 'global', item }, defaults: { value } })
-    config.global[item] = row.value
+  for (const [item, value] of Object.entries(globals.defaultConfig.global)) {
+    const [row] = await globals.sequelize.models.config.findOrCreate({ where: { guild: 'global', item }, defaults: { value } })
+    globals.config.global[item] = row.value
   }
 
-  for (const [item, value] of Object.entries(defaultConfig.guild)) {
-    const [row] = await sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
-    config[guild][item] = row.value
+  for (const [item, value] of Object.entries(globals.defaultConfig.guild)) {
+    const [row] = await globals.equelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
+    globals.config[guild][item] = row.value
   }
 
-  for (const module of modules.values()) {
-    const [{ value }] = await sequelize.models.module.findOrCreate({ where: { guild, module: module.name } })
+  for (const module of globals.modules.values()) {
+    const [{ value }] = await globals.sequelize.models.module.findOrCreate({ where: { guild, module: module.name } })
     module.enabled[guild] = value
   }
 
-  for (const command of commands.values()) {
-    const [{ value }] = await sequelize.models.command.findOrCreate({ where: { guild, command: command.name } })
+  for (const command of globals.commands.values()) {
+    const [{ value }] = await globals.sequelize.models.command.findOrCreate({ where: { guild, command: command.name } })
     command.enabled[guild] = value
   }
 }

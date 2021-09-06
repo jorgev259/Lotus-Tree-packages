@@ -1,4 +1,47 @@
+const { permCheck, permGet } = require('./util')
+
 module.exports = {
+  help: {
+    usage: 'help [command]',
+    desc: 'This command displays information about a command',
+    async execute (globals, { message }) {
+      const { config, param, commands, sequelize } = globals
+      const { prefix } = config[message.guild.id]
+
+      async function evalCommand (command) {
+        const permData = await permCheck(command, message, globals, { channel: true })
+
+        if (permData && command.desc) {
+          const channelPerms = await permGet(sequelize, {
+            where: {
+              type: 'allow', category: 'channel', command: command.name, guild: message.guild.id
+            }
+          })
+          return `${command.desc}.${command.usage ? `\nUsage: ${prefix}${command.usage}` : ''}${channelPerms.length > 0 ? `\n(Usable on: ${channelPerms.map(e => `#${e.name}`).join(' ')})` : ''}`
+        }
+      }
+
+      if (param[1]) {
+        const name = param[1].toLowerCase()
+        if (commands.has(name) && (commands.get(name).usage || commands.get(name).desc)) {
+          const command = commands.get(name)
+          const result = await evalCommand(command)
+
+          if (result) message.channel.send(result)
+        }
+      } else {
+        const fields = []
+        for (const [name, command] of commands.entries()) {
+          const value = await evalCommand(command)
+          if (value) fields.push({ name, value })
+        }
+
+        const embed = { fields }
+        message.author.send({ embeds: [embed] })
+      }
+    }
+  },
+
   about: {
     desc: 'Info about the bot',
     async execute ({ client, configFile }, { message }) {
@@ -28,7 +71,7 @@ module.exports = {
   },
 
   perms: {
-    desc: 'Adds, removes or lists permissions to a command.',
+    desc: 'Adds, removes or lists permissions to a command',
     usage: 'perms [command name] <allow/deny> <@user|roleName|#channel>',
     async execute ({ sequelize, param, commands }, { message }) {
       if (param.length < 4) return message.channel.send('Not enough parameters.')
@@ -84,7 +127,7 @@ module.exports = {
 
   toggle: {
     usage: 'toggle [module/command] [command name]',
-    desc: 'Enables or disables a command/module.',
+    desc: 'Enables or disables a command/module',
     async execute ({ client, param, sequelize, commands, modules }, { message }) {
       if (!param[2] || !['module', 'command'].includes(param[1].toLowerCase())) return message.channel.send('Usage: toggle [module/command] [name]')
 
@@ -122,7 +165,7 @@ module.exports = {
 
   config: {
     usage: 'config [option] [value]',
-    desc: 'Changes a bot configuration.',
+    desc: 'Changes a bot configuration',
     async execute ({ param, sequelize, config }, { message }) {
       const item = param[1].toLowerCase()
       const keys = (await sequelize.models.config.findAll({ attributes: ['item'], group: 'item' })).map(c => c.item)

@@ -5,7 +5,7 @@ module.exports = {
   async permCheck (command, message, { configFile, sequelize }) {
     if (command.ownerOnly) return configFile.ownerIds.includes(message.author.id)
 
-    const rows = (await sequelize.models.perm.findAll({ where: { command: command.name } }))
+    const rows = (await sequelize.models.perm.findAll({ where: { command: command.name, guild: message.guild.id } }))
       .sort((a, b) =>
         orderCategory.indexOf(a.category) - orderCategory.indexOf(b.category) ||
             orderType.indexOf(a.type) - orderType.indexOf(b.type) ||

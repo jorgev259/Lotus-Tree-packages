@@ -14,6 +14,7 @@ module.exports = {
   permGet,
   async permCheck (command, message, { configFile, sequelize }, overrides = {}) {
     if (command.ownerOnly) return configFile.ownerIds.includes(message.author.id)
+    if (message.member.permissions.has('ADMINISTRATOR')) return true
 
     const rows = permSort(await permGet(sequelize, { where: { command: command.name, guild: message.guild.id } }))
     if (rows.length === 0) return true

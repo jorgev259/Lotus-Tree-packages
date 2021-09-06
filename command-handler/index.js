@@ -12,7 +12,7 @@ async function checkGuild (guild, globals) {
   }
 
   for (const [item, value] of Object.entries(globals.defaultConfig.guild)) {
-    const [row] = await globals.equelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
+    const [row] = await globals.sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
     globals.config[guild][item] = row.value
   }
 

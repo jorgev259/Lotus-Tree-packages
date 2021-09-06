@@ -33,7 +33,12 @@ module.exports = {
 
     sequelize.models.saucenao.findAll()
       .then(rows => {
-        rows.forEach(({ guild, channel }) => config[guild].saucenao.add(channel))
+        rows.forEach(({ guild, channel }) => {
+          if (!config[guild]) config[guild] = { saucenao: new Set() }
+          else if (!config[guild].saucenao) config[guild].saucenao = new Set()
+
+          config[guild].saucenao.add(channel)
+        })
       })
   },
   async messageCreate ({ config, client, configFile }, message) {

@@ -77,7 +77,7 @@ module.exports = {
 
       if (message.content.startsWith(prefix)) {
         const param = message.content.split(' ')
-        const commandName = param[0].toLowerCase().substring(1)
+        const commandName = param[0].toLowerCase().substring(prefix.length)
 
         if (!commands.has(commandName)) return
         const command = commands.get(commandName)

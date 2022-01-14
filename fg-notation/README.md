@@ -3,6 +3,10 @@
 Discord bot that converts fighting game inputs into easy to read images.
 
 ## Commands
+\>help: Lists all available commands
+
+\>help command: Shows description and usage of an specific command
+
 \>fgi: Converts fighting game inputs into an image
 
 \>fgsave: Saves a series inputs as a reusable command
@@ -10,9 +14,9 @@ Discord bot that converts fighting game inputs into easy to read images.
 \>fgcaption: Saves a series inputs as a reusable command
 
 ## Examples
-[![demo1.mp4]([img]https://i.imgur.com/ZBD1LiE.mp4[/img])]
-[![demo2.mp4]([img]https://i.imgur.com/WeNCICp.mp4[/img])]
-[![demo3.mp4]([img]https://i.imgur.com/UoOfXxG.mp4[/img])]
+[![demo1.gif]([img]https://i.imgur.com/ZBD1LiE.mp4[/img])]
+[![demo2.gif]([img]https://i.imgur.com/WeNCICp.mp4[/img])]
+[![demo3.gif]([img]https://i.imgur.com/UoOfXxG.mp4[/img])]
 
 ## Available games
 | Game                | Name |

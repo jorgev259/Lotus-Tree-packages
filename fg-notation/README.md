@@ -14,9 +14,9 @@ Discord bot that converts fighting game inputs into easy to read images.
 \>fgcaption: Saves a series inputs as a reusable command
 
 ## Examples
-[![demo1.gif]([img]https://i.imgur.com/ZBD1LiE.mp4[/img])]
-[![demo2.gif]([img]https://i.imgur.com/WeNCICp.mp4[/img])]
-[![demo3.gif]([img]https://i.imgur.com/UoOfXxG.mp4[/img])]
+[![demo1.gif]([img]http://i.imgur.com/Usvfhuwh.gif[/img])]
+[![demo2.gif]([img]http://i.imgur.com/Usvfhuwh.gif[/img])]
+[![demo3.gif]([img]https://i.imgur.com/vYZ7r7a.gif[/img])]
 
 ## Available games
 | Game                | Name |

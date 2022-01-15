@@ -16,11 +16,11 @@ Discord bot that converts fighting game inputs into easy to read images.
 \>fgglossary: Searches for a term on [Infil's Fighting Game Glossary](https://glossary.infil.net)
 
 ## Examples
-https://user-images.githubusercontent.com/19596334/149458438-775d2da6-0573-46f3-b7dd-0030adaad124.mp4
+<img src="https://user-images.githubusercontent.com/19596334/149458438-775d2da6-0573-46f3-b7dd-0030adaad124.mp4" height="300px" />
 
-https://user-images.githubusercontent.com/19596334/149458504-baf906a3-87da-4d92-9b56-e0de5fd858c1.mp4
+<img src="https://user-images.githubusercontent.com/19596334/149458504-baf906a3-87da-4d92-9b56-e0de5fd858c1.mp4" height="300px" />
 
-https://user-images.githubusercontent.com/19596334/149458508-1dcf89fb-a83e-44bb-a6a0-9549771c6082.mp4
+<img src="https://user-images.githubusercontent.com/19596334/149458508-1dcf89fb-a83e-44bb-a6a0-9549771c6082.mp4" height="300px" />
 
 ## Available games
 | Game                | Name |

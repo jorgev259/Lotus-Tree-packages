@@ -13,6 +13,8 @@ Discord bot that converts fighting game inputs into easy to read images.
 
 \>fgcaption: Saves a series inputs as a reusable command
 
+\>fgglossary: Searches for a term on [Infil's Fighting Game Glossary](https://glossary.infil.net)
+
 ## Examples
 https://user-images.githubusercontent.com/19596334/149458438-775d2da6-0573-46f3-b7dd-0030adaad124.mp4
 
@@ -41,3 +43,16 @@ Use [this link](https://discord.com/oauth2/authorize?client_id=92853905283417702
 
 ## Self-host (with Lotus-Tree)
 Follow instructions on how to add to a Louts-Tree bot on [this link](https://github.com/jorgev259/Lotus-Tree)
+
+## Credits
+
+[Infil's Fighting Game Glossary](https://glossary.infil.net): for the rich and awesome glossary
+[MagicianStuff's Fighthing Game notations emotes](https://twitter.com/MagicianStuff/status/1477931054484893697)
+
+## Changelog
+
+# 1.1.0
+
+1. Added fgglosary command
+1. Fixed wrong default command
+1. Drifted tonight carried by the waves

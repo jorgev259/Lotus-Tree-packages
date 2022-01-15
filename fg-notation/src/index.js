@@ -49,7 +49,7 @@ const builtin = {
   37: {
     game: 'sf',
     caption: '***LETS GO JUSTIN!***',
-    input: '6 6 6 6 6 6 6 >> 6 6 6 6 6 6 6 >> 8 6 j. hk >> 2 mk >> 623 hp >> 236 236 lk'
+    input: '6 6 6 6 6 6 6 >> 6 6 6 6 6 6 6 >> 8 6 j. hk >> 2 mk >> 623 mp >> 236 236 lk'
   }
 }
 

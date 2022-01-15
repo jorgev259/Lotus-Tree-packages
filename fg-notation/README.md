@@ -51,8 +51,8 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 ## Changelog
 
-# 1.1.0
+### 1.1.0
 
-1. Added fgglosary command
-1. Fixed wrong default command
-1. Drifted tonight carried by the waves
+- Added fgglosary command
+- Fixed wrong default command
+- Drifted tonight carried by the waves

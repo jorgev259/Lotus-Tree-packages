@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: fregante/setup-git-user@v1
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: 'Build command-handler'
+        if: always()
+        run: |
+          cd command-handler
+          npm install
+          npm run build
+          git add lib/*
+
+      - name: 'Build fg-notation'
+        if: always()
+        run: |
+          cd fg-notation
+          npm install
+          npm run build
+          git add lib/*
+
+      - name: 'Commit lib changes'
+        if: always()
+        run: |
+          git diff-index --quiet HEAD || git commit -m 'Deploy!'
+          git push
+

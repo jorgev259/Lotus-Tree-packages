@@ -50,10 +50,17 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 [MagicianStuff's Fighthing Game notations emotes](https://twitter.com/MagicianStuff/status/1477931054484893697)
 
+[Bot profile picture](https://www.youtube.com/watch?v=8TdNX75oiRk)
+
 ## Changelog
+
+### 1.1.1
+
+- Added "rc" as a valid input for Guilty Gear
+- More descriptive message when "fgglossary" finds multiple matching terms
 
 ### 1.1.0
 
-- Added fgglosary command
+- Added fgglossary command
 - Fixed wrong default command
 - Drifted tonight carried by the waves

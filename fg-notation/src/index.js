@@ -188,7 +188,7 @@ export default {
         if (result.length === 0) return message.reply(`Term "${search}" not found`)
         if (result.length === 1) return message.reply(`\`\`\`${glossary[result[0]].def}\`\`\`Source: <${url}>`)
 
-        message.reply(url)
+        message.reply(`Multiple terms found: ${url}`)
       }
     }
   }

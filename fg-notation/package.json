@@ -4,8 +4,9 @@
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "build": "babel --delete-dir-on-start --copy-files --source-maps inline --root-mode upward src --out-dir lib",
-    "dev": "yarn build --watch"
+    "run-babel" : "babel --delete-dir-on-start --copy-files src",
+    "build": "yarn run run-babel -- --out-dir lib",
+    "dev": "yarn run run-babel -- --watch --out-dir dev"
   },
   "dependencies": {
     "glob": "^7.2.0",

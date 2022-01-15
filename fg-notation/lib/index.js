@@ -465,7 +465,7 @@ var _default = {
                   return _context5.abrupt("return", message.reply("```".concat(glossary[result[0]].def, "```Source: <").concat(url, ">")));
 
                 case 12:
-                  message.reply(url);
+                  message.reply("Multiple terms found: ".concat(url));
 
                 case 13:
                 case "end":

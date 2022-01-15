@@ -2,10 +2,32 @@ import sharp from 'sharp'
 import path from 'path'
 import glob from 'glob'
 import { DataTypes } from 'sequelize'
+import rp from 'request-promise'
 
 const imgPath = path.join(__dirname, 'img')
 const basicInputs = new Map()
 const gameInputs = new Map()
+
+let glossary = {}
+let terms = []
+
+getGlossary()
+setInterval(getGlossary, 5 * 60 * 1000)
+
+async function getGlossary () {
+  const result = JSON.parse(await rp('https://glossary.infil.net/json/glossary.json'))
+  const tempG = {}
+  const tempT = []
+
+  result.forEach(i => {
+    const term = i.term.toLowerCase()
+    tempG[term] = i
+    tempT.push(term)
+  })
+
+  glossary = tempG
+  terms = tempT
+}
 
 glob.sync(path.join(imgPath, 'basic/**'), { nodir: true })
   .forEach(p => {
@@ -149,6 +171,24 @@ export default {
         await row.save()
 
         message.channel.send(`Saved caption for input list "${name}"`)
+      }
+    },
+    fgglossary: {
+      usage: 'fgglossary [search term]',
+      desc: 'Searches for a term on Infil\'s Glossary',
+      example: 'fgglossary mexican uppercut',
+      execute: async ({ param, sequelize }, { message }) => {
+        const params = param.slice(1)
+        if (params.length === 0) return message.reply('Missing search term. Example: >fgglossary mexican uppercut')
+
+        const search = params.join(' ').toLowerCase()
+        const result = terms.filter(i => i.includes(search))
+        const url = `https://glossary.infil.net/?t=${params.join('%20').toLowerCase()}`
+
+        if (result.length === 0) return message.reply(`Term "${search}" not found`)
+        if (result.length === 1) return message.reply(`\`\`\`${glossary[result[0]].def}\`\`\`Source: <${url}>`)
+
+        message.reply(url)
       }
     }
   }

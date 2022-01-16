@@ -2,8 +2,9 @@ import sharp from 'sharp'
 import path from 'path'
 import glob from 'glob'
 import { DataTypes } from 'sequelize'
-import rp from 'request-promise'
+import bent from 'bent'
 
+const getJSON = bent('json')
 const imgPath = path.join(__dirname, 'img')
 const basicInputs = new Map()
 const gameInputs = new Map()
@@ -15,7 +16,7 @@ getGlossary()
 setInterval(getGlossary, 5 * 60 * 1000)
 
 async function getGlossary () {
-  const result = JSON.parse(await rp('https://glossary.infil.net/json/glossary.json'))
+  const result = await getJSON('https://glossary.infil.net/json/glossary.json')
   const tempG = {}
   const tempT = []
 

@@ -58,6 +58,7 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 - Added "rc" as a valid input for Guilty Gear
 - More descriptive message when "fgglossary" finds multiple matching terms
+- Being a dark sea
 
 ### 1.1.0
 

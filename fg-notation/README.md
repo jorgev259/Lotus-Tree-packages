@@ -46,7 +46,7 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 ## Credits
 
-[Infil's Fighting Game Glossary](https://glossary.infil.net): for the rich and awesome glossary
+[Infil's Fighting Game Glossary](https://glossary.infil.net)
 
 [MagicianStuff's Fighthing Game notations emotes](https://twitter.com/MagicianStuff/status/1477931054484893697)
 

@@ -4,6 +4,8 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
@@ -191,13 +193,18 @@ module.exports = {
     desc: 'Info about the bot',
     execute: function execute(_ref2, _ref3) {
       return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
-        var client, configFile, message;
+        var client, configFile, modules, message, abouts;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                client = _ref2.client, configFile = _ref2.configFile;
+                client = _ref2.client, configFile = _ref2.configFile, modules = _ref2.modules;
                 message = _ref3.message;
+                abouts = (0, _toConsumableArray2["default"])(modules.values()).filter(function (m) {
+                  return !!m.about;
+                }).map(function (m) {
+                  return m.about;
+                });
                 message.channel.send({
                   embeds: [{
                     title: 'About',
@@ -209,14 +216,14 @@ module.exports = {
                     fields: [{
                       name: 'Developed by',
                       value: 'ChitoWarlock (Chito#2869) ([Github](https://github.com/jorgev259)) ([Twitter](https://twitter.com/ChitoWarlock))'
-                    }, {
+                    }].concat((0, _toConsumableArray2["default"])(abouts), [{
                       name: 'Throw me a bone! or something',
                       value: '[Paypal](https://paypal.me/chitowarlock) or [Ko-Fi](https://Ko-fi.com/E1E8I3VN)'
-                    }]
+                    }])
                   }]
                 });
 
-              case 3:
+              case 4:
               case "end":
                 return _context3.stop();
             }

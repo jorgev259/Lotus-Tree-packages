@@ -23,7 +23,9 @@ var _glob = _interopRequireDefault(require("glob"));
 
 var _sequelize = require("sequelize");
 
-var _requestPromise = _interopRequireDefault(require("request-promise"));
+var _bent = _interopRequireDefault(require("bent"));
+
+var getJSON = (0, _bent["default"])('json');
 
 var imgPath = _path["default"].join(__dirname, 'img');
 
@@ -45,13 +47,11 @@ function _getGlossary() {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            _context6.t0 = JSON;
-            _context6.next = 3;
-            return (0, _requestPromise["default"])('https://glossary.infil.net/json/glossary.json');
+            _context6.next = 2;
+            return getJSON('https://glossary.infil.net/json/glossary.json');
 
-          case 3:
-            _context6.t1 = _context6.sent;
-            result = _context6.t0.parse.call(_context6.t0, _context6.t1);
+          case 2:
+            result = _context6.sent;
             tempG = {};
             tempT = [];
             result.forEach(function (i) {
@@ -62,7 +62,7 @@ function _getGlossary() {
             glossary = tempG;
             terms = tempT;
 
-          case 10:
+          case 8:
           case "end":
             return _context6.stop();
         }
@@ -158,6 +158,10 @@ var builtin = {
 };
 var _default = {
   name: 'fg-notation',
+  about: {
+    name: 'FG Notation',
+    value: '[Instructions and source code](https://lotus.chitowarlock.com/fgnotation)\n[Infil\'s Fighting Game Glossary](https://glossary.infil.net)\n[MagicianStuff\'s Fighthing Game notations emotes](https://twitter.com/MagicianStuff/status/1477931054484893697)'
+  },
   intents: ['GUILD_MESSAGES'],
   partials: ['MESSAGE'],
   preload: function preload(sequelize) {

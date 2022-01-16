@@ -10,10 +10,12 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@lotus-tree/command-handler": "^2.1.0",
     "bent": "^7.3.12",
     "glob": "^7.2.0",
     "sharp": "^0.29.3"
+  },
+  "peerDependencies": {
+    "@lotus-tree/command-handler": "^2.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.7",

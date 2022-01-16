@@ -5,9 +5,9 @@ inputs:
 
 runs:
   using: "composite"
-  if: always()
-  run: |
-    cd ${{ inputs.folder }}
-    npm install
-    npm run build
-    git add lib/*
+  steps:
+    - run: |
+      cd ${{ inputs.folder }}
+      npm install
+      npm run build
+      git add lib/*

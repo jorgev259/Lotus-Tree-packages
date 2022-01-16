@@ -18,11 +18,13 @@ jobs:
 
       - name: 'Build command-handler'
         uses: ./buildAction
+        if: always()
         with:
           folder: 'command-handler'
 
       - name: 'Build fg-notation'
         uses: ./buildAction
+        if: always()
         with:
           folder: 'fg-notation'
 

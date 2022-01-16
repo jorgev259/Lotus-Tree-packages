@@ -10,6 +10,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
+    "@lotus-tree/command-handler": "^2.0.0",
     "bent": "^7.3.12",
     "glob": "^7.2.0",
     "sharp": "^0.29.3"

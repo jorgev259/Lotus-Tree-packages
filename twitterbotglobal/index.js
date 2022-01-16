@@ -1,5 +1,9 @@
 module.exports = {
   name: 'twitterbot',
+  about: {
+    name: 'Twitter Relay',
+    value: '[Configurable module that relays tweets directly to Discord](https://github.com/jorgev259/Lotus-Tree-packages/tree/main/twitterbotglobal)'
+  },
   config: {
     global: {
       approvalChannelName: 'tweet-approval',

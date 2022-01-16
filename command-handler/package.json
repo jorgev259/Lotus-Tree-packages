@@ -1,12 +1,13 @@
 {
   "name": "@lotus-tree/command-handler",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
     "run-babel" : "babel --delete-dir-on-start --copy-files src",
-    "build": "yarn run run-babel -- --out-dir lib",
-    "dev": "yarn run run-babel -- --watch --out-dir dev"
+    "build": "yarn run run-babel --out-dir lib",
+    "dev": "yarn run run-babel --watch --out-dir dev",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "sequelize": "^6.6.5"

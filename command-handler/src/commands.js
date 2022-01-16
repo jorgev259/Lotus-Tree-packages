@@ -54,7 +54,9 @@ module.exports = {
 
   about: {
     desc: 'Info about the bot',
-    async execute ({ client, configFile }, { message }) {
+    async execute ({ client, configFile, modules }, { message }) {
+      const abouts = [...modules.values()].filter(m => !!m.about).map(m => m.about)
+
       message.channel.send({
         embeds: [{
           title: 'About',
@@ -70,6 +72,7 @@ module.exports = {
               name: 'Developed by',
               value: 'ChitoWarlock (Chito#2869) ([Github](https://github.com/jorgev259)) ([Twitter](https://twitter.com/ChitoWarlock))'
             },
+            ...abouts,
             {
               name: 'Throw me a bone! or something',
               value: '[Paypal](https://paypal.me/chitowarlock) or [Ko-Fi](https://Ko-fi.com/E1E8I3VN)'

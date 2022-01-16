@@ -1,0 +1,13 @@
+name: 'Build package'
+inputs:
+  folder:
+    required: true
+
+runs:
+  using: "composite"
+  if: always()
+  run: |
+    cd ${{ inputs.folder }}
+    npm install
+    npm run build
+    git add lib/*

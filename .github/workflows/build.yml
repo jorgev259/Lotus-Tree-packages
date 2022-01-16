@@ -17,20 +17,14 @@ jobs:
           node-version: '16'
 
       - name: 'Build command-handler'
-        if: always()
-        run: |
-          cd command-handler
-          npm install
-          npm run build
-          git add lib/*
+        uses: ./buildAction
+        with:
+          folder: 'command-handler'
 
       - name: 'Build fg-notation'
-        if: always()
-        run: |
-          cd fg-notation
-          npm install
-          npm run build
-          git add lib/*
+        uses: ./buildAction
+        with:
+          folder: 'fg-notation'
 
       - name: 'Commit lib changes'
         if: always()

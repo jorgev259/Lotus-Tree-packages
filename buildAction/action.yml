@@ -6,8 +6,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-      cd ${{ inputs.folder }}
-      npm install
-      npm run build
-      git add lib/*
+    - shell: bash 
+      run: |
+        cd ${{ inputs.folder }}
+        npm install
+        npm run build
+        git add lib/*

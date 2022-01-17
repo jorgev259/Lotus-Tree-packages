@@ -58,12 +58,14 @@ function solveInput (inputs, input) {
 }
 
 async function sendInput (inputs, result, message, caption) {
-  const canvas = await sharp({ create: { width: 152 * result.length, height: 152, channels: 4, background: 'transparent' } })
+  let canvas = await sharp({ create: { width: 152 * result.length, height: 152, channels: 4, background: 'transparent' } })
     .composite(result.map((it, index) =>
-      ({ input: inputs.get(it), left: index * 152, top: 0, width: 152, height: 152 })
+      ({ input: inputs.get(it), left: index * 152, top: 0 })
     ))
     .png()
     .toBuffer()
+
+  if (result.length < 12) canvas = await sharp(canvas).resize({ height: 55 }).png().toBuffer()
 
   return message.reply({ content: caption, files: [canvas] })
 }

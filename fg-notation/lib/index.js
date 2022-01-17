@@ -9,9 +9,9 @@ exports["default"] = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
@@ -24,6 +24,8 @@ var _glob = _interopRequireDefault(require("glob"));
 var _sequelize = require("sequelize");
 
 var _bent = _interopRequireDefault(require("bent"));
+
+var _info = require("./info.json");
 
 var getJSON = (0, _bent["default"])('json');
 
@@ -77,27 +79,55 @@ _glob["default"].sync(_path["default"].join(imgPath, 'basic/**'), {
 }).forEach(function (p) {
   var input = p.split('/').pop().replace('.png', '');
   basicInputs.set(input, p);
+  var alias = _info.aliases.inputs.basic[input];
+
+  if (alias) {
+    alias.forEach(function (i) {
+      basicInputs.set(i, p);
+      if (_info.sizes[input]) _info.sizes[i] = _info.sizes[input];
+    });
+  }
 });
 
-basicInputs.set('>>', _path["default"].join(imgPath, 'basic/doubleforward.png'));
-
-_glob["default"].sync(_path["default"].join(imgPath, 'games/**'), {
-  nodir: true
-}).forEach(function (p) {
+_glob["default"].sync(_path["default"].join(imgPath, 'games/*')).forEach(function (p) {
   var _path$parse = _path["default"].parse(_path["default"].relative(_path["default"].join(imgPath, 'games'), p)),
-      dir = _path$parse.dir,
-      name = _path$parse.name;
+      base = _path$parse.base;
 
-  if (!gameInputs.has(dir)) gameInputs.set(dir, new Map());
-  gameInputs.get(dir).set(name, p);
+  gameInputs.set(base, new Map());
+
+  _glob["default"].sync(_path["default"].join(imgPath, 'games', base, '**'), {
+    nodir: true
+  }).forEach(function (input) {
+    var _path$parse2 = _path["default"].parse(input),
+        name = _path$parse2.name;
+
+    gameInputs.get(base).set(name, input);
+  });
+
+  var alias = _info.aliases.inputs.games[base];
+
+  if (alias) {
+    for (var _i = 0, _Object$entries = Object.entries(alias); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = (0, _slicedToArray2["default"])(_Object$entries[_i], 2),
+          a = _Object$entries$_i[0],
+          s = _Object$entries$_i[1];
+
+      gameInputs.get(base).set(a, s);
+    }
+  }
 });
 
 function solveInput(inputs, input) {
-  if (inputs.has(input)) return [input];
+  if (inputs.has(input)) return isString(inputs.get(input)) ? [input] : inputs.get(input);
 
   for (var i = 0; i < input.length; i++) {
     var s1 = input.slice(0, 0 - i);
-    if (inputs.has(s1)) return [s1].concat((0, _toConsumableArray2["default"])(solveInput(inputs, input.slice(0 - i))));
+
+    if (inputs.has(s1)) {
+      var result = inputs.get(s1);
+      var remaining = solveInput(inputs, input.slice(0 - i));
+      return isString(result) ? [s1].concat((0, _toConsumableArray2["default"])(remaining)) : [].concat((0, _toConsumableArray2["default"])(result), (0, _toConsumableArray2["default"])(remaining));
+    }
   }
 
   throw new Error("Cannot find \"".concat(input, "\" as a recognizable input"));
@@ -109,37 +139,61 @@ function sendInput(_x, _x2, _x3, _x4) {
 
 function _sendInput() {
   _sendInput = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(inputs, result, message, caption) {
-    var canvas;
+    var width, images, left, canvas;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _context7.next = 2;
-            return (0, _sharp["default"])({
+            width = result.map(function (it) {
+              return _info.sizes[it] || 152;
+            }).reduce(function (a, b) {
+              return a + b;
+            }, 0);
+            images = [];
+            left = 0;
+            result.forEach(function (it, index) {
+              var size = _info.sizes[it] || 152;
+              images.push({
+                input: inputs.get(it),
+                left: left,
+                top: Math.floor((152 - size) / 2)
+              });
+              left += size;
+            });
+            canvas = (0, _sharp["default"])({
               create: {
-                width: 152 * result.length,
+                width: width,
                 height: 152,
                 channels: 4,
                 background: 'transparent'
               }
-            }).composite(result.map(function (it, index) {
-              return {
-                input: inputs.get(it),
-                left: index * 152,
-                top: 0,
-                width: 152,
-                height: 152
-              };
-            })).png().toBuffer();
+            }).png().composite(images);
+            _context7.next = 7;
+            return canvas.toBuffer();
 
-          case 2:
+          case 7:
             canvas = _context7.sent;
+
+            if (!(result.length < 12)) {
+              _context7.next = 12;
+              break;
+            }
+
+            _context7.next = 11;
+            return (0, _sharp["default"])(canvas).resize({
+              height: 55
+            }).png().toBuffer();
+
+          case 11:
+            canvas = _context7.sent;
+
+          case 12:
             return _context7.abrupt("return", message.reply({
               content: caption,
               files: [canvas]
             }));
 
-          case 4:
+          case 13:
           case "end":
             return _context7.stop();
         }
@@ -149,13 +203,14 @@ function _sendInput() {
   return _sendInput.apply(this, arguments);
 }
 
-var builtin = {
-  37: {
-    game: 'sf',
-    caption: '***LETS GO JUSTIN!***',
-    input: '6 6 6 6 6 6 6 >> 6 6 6 6 6 6 6 >> 8 6 j. hk >> 2 mk >> 623 mp >> 236 236 lk'
-  }
-};
+function checkGame(game) {
+  return gameInputs.has(game) ? game : _info.aliases.games[game];
+}
+
+function isString(x) {
+  return Object.prototype.toString.call(x) === '[object String]';
+}
+
 var _default = {
   name: 'fg-notation',
   about: {
@@ -207,7 +262,7 @@ var _default = {
                 }
 
                 name = message.content.split(' ').pop().replace(prefix, '');
-                _context.t0 = builtin[name];
+                _context.t0 = _info.builtin[name];
 
                 if (_context.t0) {
                   _context.next = 12;
@@ -249,7 +304,7 @@ var _default = {
       example: 'fgi sf 236P 214K',
       execute: function () {
         var _execute = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref, _ref2) {
-          var param, message, _param, game, i1, inputs, result;
+          var param, message, _param, gameInput, i1, game, inputs, result;
 
           return _regenerator["default"].wrap(function _callee2$(_context2) {
             while (1) {
@@ -257,9 +312,9 @@ var _default = {
                 case 0:
                   param = _ref.param;
                   message = _ref2.message;
-                  _param = (0, _slicedToArray2["default"])(param, 3), game = _param[1], i1 = _param[2];
+                  _param = (0, _slicedToArray2["default"])(param, 3), gameInput = _param[1], i1 = _param[2];
 
-                  if (!(!game || !i1)) {
+                  if (!(!gameInput || !i1)) {
                     _context2.next = 5;
                     break;
                   }
@@ -267,21 +322,27 @@ var _default = {
                   return _context2.abrupt("return", message.reply('Missing arguments. Example: >fgi sf 236P 214K'));
 
                 case 5:
+                  game = checkGame(gameInput);
+
                   if (gameInputs.has(game)) {
-                    _context2.next = 7;
+                    _context2.next = 8;
                     break;
                   }
 
                   return _context2.abrupt("return", message.reply("\"".concat(game, "\" is not a valid game. Available games: ").concat(Array.from(gameInputs.keys()).join(' '))));
 
-                case 7:
-                  inputs = new Map([].concat((0, _toConsumableArray2["default"])(basicInputs), (0, _toConsumableArray2["default"])(gameInputs.get(game))));
-                  result = param.slice(2).map(function (i) {
-                    return solveInput(inputs, i.toLowerCase());
-                  }).flat();
-                  sendInput(inputs, result, message);
+                case 8:
+                  try {
+                    inputs = new Map([].concat((0, _toConsumableArray2["default"])(basicInputs), (0, _toConsumableArray2["default"])(gameInputs.get(game))));
+                    result = param.slice(2).map(function (i) {
+                      return solveInput(inputs, i.toLowerCase());
+                    }).flat();
+                    sendInput(inputs, result, message);
+                  } catch (err) {
+                    message.reply(err.message);
+                  }
 
-                case 10:
+                case 9:
                 case "end":
                   return _context2.stop();
               }
@@ -302,7 +363,7 @@ var _default = {
       example: 'fgi sf testName 236P 214K',
       execute: function () {
         var _execute2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(_ref3, _ref4) {
-          var param, sequelize, message, _param2, game, name, i1, inputs, input;
+          var param, sequelize, message, _param2, gameInput, name, i1, game, inputs, input;
 
           return _regenerator["default"].wrap(function _callee3$(_context3) {
             while (1) {
@@ -310,9 +371,9 @@ var _default = {
                 case 0:
                   param = _ref3.param, sequelize = _ref3.sequelize;
                   message = _ref4.message;
-                  _param2 = (0, _slicedToArray2["default"])(param, 4), game = _param2[1], name = _param2[2], i1 = _param2[3];
+                  _param2 = (0, _slicedToArray2["default"])(param, 4), gameInput = _param2[1], name = _param2[2], i1 = _param2[3];
 
-                  if (!(!game || !name || !i1)) {
+                  if (!(!gameInput || !name || !i1)) {
                     _context3.next = 5;
                     break;
                   }
@@ -320,19 +381,22 @@ var _default = {
                   return _context3.abrupt("return", message.reply('Missing arguments. Example: >fgi sf testName 236P 214K'));
 
                 case 5:
+                  game = checkGame(gameInput);
+
                   if (gameInputs.has(game)) {
-                    _context3.next = 7;
+                    _context3.next = 8;
                     break;
                   }
 
                   return _context3.abrupt("return", message.reply("\"".concat(game, "\" is not a valid game. Available games: ").concat(Array.from(gameInputs.keys()).join(' '))));
 
-                case 7:
+                case 8:
+                  _context3.prev = 8;
                   inputs = new Map([].concat((0, _toConsumableArray2["default"])(basicInputs), (0, _toConsumableArray2["default"])(gameInputs.get(game))));
                   input = param.slice(3).map(function (i) {
                     return solveInput(inputs, i.toLowerCase());
                   }).flat().join(' ');
-                  _context3.next = 11;
+                  _context3.next = 13;
                   return sequelize.models.fginput.create({
                     guild: message.guild.id,
                     name: name,
@@ -341,15 +405,22 @@ var _default = {
                     input: input
                   });
 
-                case 11:
+                case 13:
                   message.channel.send("Saved command \"".concat(input, "\" as \"").concat(name, "\""));
+                  _context3.next = 19;
+                  break;
 
-                case 12:
+                case 16:
+                  _context3.prev = 16;
+                  _context3.t0 = _context3["catch"](8);
+                  message.reply(_context3.t0.message);
+
+                case 19:
                 case "end":
                   return _context3.stop();
               }
             }
-          }, _callee3);
+          }, _callee3, null, [[8, 16]]);
         }));
 
         function execute(_x7, _x8) {

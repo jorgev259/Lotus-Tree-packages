@@ -23,20 +23,21 @@ https://user-images.githubusercontent.com/19596334/149458504-baf906a3-87da-4d92-
 https://user-images.githubusercontent.com/19596334/149458508-1dcf89fb-a83e-44bb-a6a0-9549771c6082.mp4
 
 ## Available games
-| Game                | Name |
-|---------------------|------|
-| Blazblue            | bb   |
-| Dragonball Fighterz | dbz  |
-| DNF Duel            | dnf  |
-| Granblue Versus     | gbf  |
-| Guilty Gear         | gg   |
-| King of Fighters    | kof  |
-| Mortal Kombat       | mk   |
-| Soul Calibur        | sc   |
-| Street Fighter      | sf   |
-| Skullgirlz          | sg   |
-| Them Fighting Herds | tfh  |
-| Tekken              | tkn  |
+| Game                       | Name  |
+|----------------------------|-------|
+| Blazblue                   | bb    |
+| Blazblue: Cross Tag Battle | bbtag |
+| Dragonball Fighterz        | dbz   |
+| DNF Duel                   | dnf   |
+| Granblue Versus            | gbf   |
+| Guilty Gear                | gg    |
+| King of Fighters           | kof   |
+| Mortal Kombat              | mk    |
+| Soul Calibur               | sc    |
+| Street Fighter             | sf    |
+| Skullgirlz                 | sg    |
+| Them Fighting Herds        | tfh   |
+| Tekken                     | tkn   |
 
 ## Add to your server
 Use [this link](https://discord.com/oauth2/authorize?client_id=928539052834177024&scope=bot&permissions=34816) to add this bot to your Discord server

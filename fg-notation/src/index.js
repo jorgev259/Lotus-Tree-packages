@@ -11,6 +11,7 @@ const gameInputs = new Map()
 
 let glossary = {}
 let terms = []
+const sizes = { '+': 55 }
 
 getGlossary()
 setInterval(getGlossary, 5 * 60 * 1000)
@@ -58,12 +59,21 @@ function solveInput (inputs, input) {
 }
 
 async function sendInput (inputs, result, message, caption) {
-  let canvas = await sharp({ create: { width: 152 * result.length, height: 152, channels: 4, background: 'transparent' } })
-    .composite(result.map((it, index) =>
-      ({ input: inputs.get(it), left: index * 152, top: 0 })
-    ))
+  const width = result.map(it => sizes[it] || 152).reduce((a, b) => a + b, 0)
+  const images = []
+  let left = 0
+
+  result.forEach((it, index) => {
+    const size = sizes[it] || 152
+    images.push({ input: inputs.get(it), left, top: Math.floor((152 - size) / 2) })
+    left += size
+  })
+
+  let canvas = sharp({ create: { width, height: 152, channels: 4, background: 'transparent' } })
     .png()
-    .toBuffer()
+    .composite(images)
+
+  canvas = await canvas.toBuffer()
 
   if (result.length < 12) canvas = await sharp(canvas).resize({ height: 55 }).png().toBuffer()
 

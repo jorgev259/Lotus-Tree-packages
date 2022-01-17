@@ -1,12 +1,12 @@
 {
   "name": "@lotus-tree/fg-notation",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
     "run-babel": "babel --delete-dir-on-start --copy-files src",
     "build": "yarn run run-babel --out-dir lib",
-    "dev": "yarn run run-babel --watch --out-dir dev",
+    "dev": "yarn run run-babel --watch --source-maps inline --out-dir dev",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {

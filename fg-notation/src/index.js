@@ -4,6 +4,8 @@ import glob from 'glob'
 import { DataTypes } from 'sequelize'
 import bent from 'bent'
 
+import { sizes, aliases, builtin } from './info.json'
+
 const getJSON = bent('json')
 const imgPath = path.join(__dirname, 'img')
 const basicInputs = new Map()
@@ -11,7 +13,6 @@ const gameInputs = new Map()
 
 let glossary = {}
 let terms = []
-const sizes = { '+': 55 }
 
 getGlossary()
 setInterval(getGlossary, 5 * 60 * 1000)
@@ -35,24 +36,48 @@ glob.sync(path.join(imgPath, 'basic/**'), { nodir: true })
   .forEach(p => {
     const input = p.split('/').pop().replace('.png', '')
     basicInputs.set(input, p)
+
+    const alias = aliases.inputs.basic[input]
+    if (alias) {
+      alias.forEach(i => {
+        basicInputs.set(i, p)
+        if (sizes[input]) sizes[i] = sizes[input]
+      })
+    }
   })
 
-basicInputs.set('>>', path.join(imgPath, 'basic/doubleforward.png'))
-
-glob.sync(path.join(imgPath, 'games/**'), { nodir: true })
+glob.sync(path.join(imgPath, 'games/*'))
   .forEach(p => {
-    const { dir, name } = path.parse(path.relative(path.join(imgPath, 'games'), p))
+    const { base } = path.parse(path.relative(path.join(imgPath, 'games'), p))
+    gameInputs.set(base, new Map())
 
-    if (!gameInputs.has(dir)) gameInputs.set(dir, new Map())
-    gameInputs.get(dir).set(name, p)
+    glob.sync(path.join(imgPath, 'games', base, '**'), { nodir: true })
+      .forEach(input => {
+        const { name } = path.parse(input)
+        gameInputs.get(base).set(name, input)
+      })
+
+    const alias = aliases.inputs.games[base]
+
+    if (alias) {
+      for (const [a, s] of Object.entries(alias)) {
+        gameInputs.get(base).set(a, s)
+      }
+    }
   })
 
 function solveInput (inputs, input) {
-  if (inputs.has(input)) return [input]
+  if (inputs.has(input)) return isString(inputs.get(input)) ? [input] : inputs.get(input)
 
   for (let i = 0; i < input.length; i++) {
     const s1 = input.slice(0, 0 - i)
-    if (inputs.has(s1)) return [s1, ...solveInput(inputs, input.slice(0 - i))]
+
+    if (inputs.has(s1)) {
+      const result = inputs.get(s1)
+      const remaining = solveInput(inputs, input.slice(0 - i))
+
+      return isString(result) ? [s1, ...remaining] : [...result, ...remaining]
+    }
   }
 
   throw new Error(`Cannot find "${input}" as a recognizable input`)
@@ -80,12 +105,12 @@ async function sendInput (inputs, result, message, caption) {
   return message.reply({ content: caption, files: [canvas] })
 }
 
-const builtin = {
-  37: {
-    game: 'sf',
-    caption: '***LETS GO JUSTIN!***',
-    input: '6 6 6 6 6 6 6 >> 6 6 6 6 6 6 6 >> 8 6 j. hk >> 2 mk >> 623 mp >> 236 236 lk'
-  }
+function checkGame (game) {
+  return gameInputs.has(game) ? game : aliases.games[game]
+}
+
+function isString (x) {
+  return Object.prototype.toString.call(x) === '[object String]'
 }
 
 export default {
@@ -144,14 +169,20 @@ export default {
       desc: 'Converts a list of inputs into an image',
       example: 'fgi sf 236P 214K',
       execute: async ({ param }, { message }) => {
-        const [, game, i1] = param
-        if (!game || !i1) return message.reply('Missing arguments. Example: >fgi sf 236P 214K')
+        const [, gameInput, i1] = param
+        if (!gameInput || !i1) return message.reply('Missing arguments. Example: >fgi sf 236P 214K')
+
+        const game = checkGame(gameInput)
         if (!gameInputs.has(game)) return message.reply(`"${game}" is not a valid game. Available games: ${Array.from(gameInputs.keys()).join(' ')}`)
 
-        const inputs = new Map([...basicInputs, ...gameInputs.get(game)])
-        const result = param.slice(2).map(i => solveInput(inputs, i.toLowerCase())).flat()
+        try {
+          const inputs = new Map([...basicInputs, ...gameInputs.get(game)])
+          const result = param.slice(2).map(i => solveInput(inputs, i.toLowerCase())).flat()
 
-        sendInput(inputs, result, message)
+          sendInput(inputs, result, message)
+        } catch (err) {
+          message.reply(err.message)
+        }
       }
     },
     fgsave: {
@@ -159,16 +190,22 @@ export default {
       desc: 'Saves a list of inputs into a command',
       example: 'fgi sf testName 236P 214K',
       execute: async ({ param, sequelize }, { message }) => {
-        const [, game, name, i1] = param
-        if (!game || !name || !i1) return message.reply('Missing arguments. Example: >fgi sf testName 236P 214K')
+        const [, gameInput, name, i1] = param
+        if (!gameInput || !name || !i1) return message.reply('Missing arguments. Example: >fgi sf testName 236P 214K')
+
+        const game = checkGame(gameInput)
         if (!gameInputs.has(game)) return message.reply(`"${game}" is not a valid game. Available games: ${Array.from(gameInputs.keys()).join(' ')}`)
 
-        const inputs = new Map([...basicInputs, ...gameInputs.get(game)])
-        const input = param.slice(3).map(i => solveInput(inputs, i.toLowerCase())).flat().join(' ')
+        try {
+          const inputs = new Map([...basicInputs, ...gameInputs.get(game)])
+          const input = param.slice(3).map(i => solveInput(inputs, i.toLowerCase())).flat().join(' ')
 
-        await sequelize.models.fginput.create({ guild: message.guild.id, name, createdBy: message.author.id, game, input })
+          await sequelize.models.fginput.create({ guild: message.guild.id, name, createdBy: message.author.id, game, input })
 
-        message.channel.send(`Saved command "${input}" as "${name}"`)
+          message.channel.send(`Saved command "${input}" as "${name}"`)
+        } catch (err) {
+          message.reply(err.message)
+        }
       }
     },
     fgcaption: {

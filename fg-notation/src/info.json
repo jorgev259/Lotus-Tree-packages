@@ -1,0 +1,33 @@
+{
+  "sizes": { "+": 55 },
+
+  "builtin": {
+    "37": {
+      "game": "sf",
+      "caption": "***LETS GO JUSTIN!***",
+      "input": "6 6 6 6 6 6 6 >> 6 6 6 6 6 6 6 >> 8 6 j. hk >> 2 mk >> 623 mp >> 236 236 lk"
+    }
+  },
+
+  "aliases": {
+    "games": {
+      "bbt": "bbtag",
+      "db": "dbz"
+    },
+
+    "inputs": {
+      "basic": {
+        "doubleforward": [">>"]
+      },
+
+      "games": {
+        "bbtag": {
+          "throw": ["b","+","c"],
+          "crb": ["d","+","p"],
+          "airdash": ["a","+","b"],
+          "reversal": ["a","+","d"]
+        }
+      }
+    }
+  }
+}

@@ -35,7 +35,7 @@ module.exports = {
       clientTwitter = new Twitter(configFile.twitter)
     },
     messageCreate ({ client }, msg) {
-      if (msg.author.id === client.user.id) return
+      if (msg.author.id === client.user.id || msg.author.bot) return
 
       const urls = Array.from(getUrls(msg.content)).filter(url => url.includes('twitter.com') && url.includes('/status/') && !url.includes('fxtwitter.com'))
       if (urls.length > 0) evalMsg(urls.map(urlString => new URL(urlString)), msg)

@@ -321,7 +321,7 @@ async function sendEmbed (msg, sequelize, info, row) {
       },
       {
         name: 'ID',
-        value: info.id.toString() || 'NOT FOUND',
+        value: info.id?.toString() || 'NOT FOUND',
         inline: true
       }
     ],

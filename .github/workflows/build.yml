@@ -28,6 +28,12 @@ jobs:
         with:
           folder: 'fg-notation'
 
+      - name: 'Build requestcat'
+        uses: ./buildAction
+        if: always()
+        with:
+          folder: 'requestcat'
+
       - name: 'Commit lib changes'
         if: always()
         run: |

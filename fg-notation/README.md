@@ -55,6 +55,14 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 ## Changelog
 
+### 1.2.0
+
+- Limit image height
+- Implement aliases
+- Add "bbtag" game
+- Add "+" as a basic input for all games
+- Drifted tonight to a finite one
+
 ### 1.1.1
 
 - Added "rc" as a valid input for Guilty Gear

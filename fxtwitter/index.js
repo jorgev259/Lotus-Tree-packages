@@ -14,7 +14,7 @@ async function evalMsg (urls, msg) {
 
   let newMsg = `${msg.author.tag}: ${msg.content}`
   tweets.forEach(({ tweet, replace }) => {
-    newMsg = newMsg.replace(replace, `https://fxtwitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
+    newMsg = newMsg.replace(replace, `https://vxtwitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
   })
 
   msg.channel.send(newMsg).then(() => msg.delete())
@@ -37,7 +37,7 @@ module.exports = {
     messageCreate ({ client }, msg) {
       if (msg.author.id === client.user.id || msg.author.bot) return
 
-      const urls = Array.from(getUrls(msg.content)).filter(url => url.includes('twitter.com') && url.includes('/status/') && !url.includes('fxtwitter.com'))
+      const urls = Array.from(getUrls(msg.content)).filter(url => url.includes('twitter.com') && url.includes('/status/') && !url.includes('vxtwitter.com'))
       if (urls.length > 0) evalMsg(urls.map(urlString => new URL(urlString)), msg)
     }
   }

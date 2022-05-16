@@ -1,7 +1,7 @@
 {
   "name": "@lotus-tree/fxtwitter",
   "packageManager": "yarn@3.0.0",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "dependencies": {
     "get-urls": "^10.0.0",
     "promise-all-forgiving": "^1.0.2",

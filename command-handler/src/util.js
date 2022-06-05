@@ -25,7 +25,7 @@ module.exports = {
       const match =
             (category === 'user' && (message.author.id === name || user)) ||
             (category === 'role' && (message.member.roles.cache.find(r => r.name === name) || role)) ||
-            (category === 'channel' && (message.channel.id === name || channel))
+            (category === 'channel' && (message.channel.name === name || channel))
 
       if (match) return type === 'allow'
     }

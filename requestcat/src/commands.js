@@ -187,32 +187,43 @@ module.exports = {
   reject: {
     desc: 'Marks a request as rejected',
     usage: 'reject [id] [reason]',
-    async execute ({ client, param, sequelize, configFile }, { message: msg }) {
-      /* if (!param[2]) return msg.channel.send('Incomplete command.')
+    async execute ({ param, socdb }, { message: msg }) {
+      if (!param[2]) return msg.reply('Incomplete command.')
 
-      doc.useServiceAccountAuth(configFile.requestcat.google)
-      await doc.loadInfo()
-
-      const req = await getId(param[1])
-      if (!req) return msg.channel.send('Request not found.')
+      const request = await socdb.models.request.findByPk(param[1])
+      if (!request) return msg.reply('Request not found')
 
       const reason = param.slice(2).join(' ')
 
-      /* sequelize.models.request.create({ user: req.User, request: req.Request, valid: false })
-      if (req.Link && req.Link.includes('vgmdb.net')) {
-        sequelize.models.vgmdb.destroy({ where: { url: req.Link } })
-      }
+      socdb.transaction(async transaction => {
+        const reqMsg = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+        await reqMsg.delete()
 
-      const messageId = req.Message
-      await req.delete()
+        request.state = 'complete'
+        await request.save()
+      })
+        .then(async () => {
+          const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
+          talkChannel.send(`The request ${request.title || request.link} from <@${request.userID}> has been rejected.\nReason: ${reason}`)
 
-      const m = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(messageId)
-      await m.delete()
+          try {
+            const member = await msg.guild.members.fetch(request.userID)
+            const donator = member.roles.cache.some(r => r.name === 'Donators')
 
-      msg.guild.channels.cache.find(c => c.name === 'requests-log').send(`Request: ${req.Request}\nBy: <@${req.User}>\nState: Rejected by ${msg.author}\nReason: ${reason}`)
-      const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
-      talkChannel.send(`The request ${req.Request} from <@${req.User}> has been rejected.\nReason: ${reason}`)
-      */
+            if (donator) return
+
+            const countPending = await getPendingCount(socdb)
+            if (countPending < 20) {
+              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
+              setLockChannel(msg, true)
+            }
+          } catch (err) {
+            catchErr(msg, err)
+          }
+        })
+        .catch(err => {
+          catchErr(msg, err)
+        })
     }
   }
 }

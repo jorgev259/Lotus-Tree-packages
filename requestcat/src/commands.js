@@ -21,16 +21,17 @@ module.exports = {
 
   pending: {
     desc: 'Shows how many pending requests you have.',
-    async execute ({ sequelize, configFile }, { message: msg }) {
-      /* doc.useServiceAccountAuth(configFile.requestcat.google)
-      await doc.loadInfo()
+    async execute ({ sequelize, configFile, socdb }, { message: msg }) {
+      const requests = await socdb.models.request.findAll({
+        attributes: ['state', [sequelize.fn('COUNT', '*'), 'count']],
+        where: { userID: msg.author.id },
+        group: 'state'
+      })
 
-      const filterFn = r => r['User ID'] === msg.author.id
-      const requests = (await getRows('requests')).filter(filterFn).length
-      const donators = (await getRows('donators')).filter(filterFn).length
-      const hold = (await getRows('hold')).filter(filterFn).length
+      const count = { pending: 0, complete: 0, hold: 0 }
+      requests.forEach(row => { count[row.state] = row.count })
 
-      msg.reply(`Pending: ${requests + donators}\nOn Hold: ${hold}`) */
+      msg.reply(`Pending: ${count.pending}\nOn Hold: ${count.hold}\nCompleted: ${count.complete}`)
     }
   },
 

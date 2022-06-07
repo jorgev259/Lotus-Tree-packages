@@ -282,7 +282,7 @@ async function sendEmbed (msg, request) {
     fields: [
       {
         name: 'Request',
-        value: `${request.title}${request.url ? ` (${request.url})` : ''}${isHold ? ' **(ON HOLD)**' : ''}`
+        value: `${request.title}${request.link ? ` (${request.link})` : ''}${isHold ? ' **(ON HOLD)**' : ''}`
       },
       {
         name: 'Requested by',

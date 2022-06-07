@@ -193,7 +193,7 @@ module.exports = {
     usage: 'request [url or name]',
     execute: function execute(_ref5, _ref6) {
       return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5() {
-        var param, socdb, msg, donator, owner, talkChannel, pending, countPending, title, urls, link, checkUrl, request;
+        var param, socdb, msg, donator, owner, talkChannel, pending, countPending, title, urls, link, checkUrl, info, request;
         return _regenerator["default"].wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -280,7 +280,7 @@ module.exports = {
                 link = urls[0];
 
                 if (!(urls.length > 0)) {
-                  _context5.next = 32;
+                  _context5.next = 37;
                   break;
                 }
 
@@ -304,7 +304,19 @@ module.exports = {
               case 31:
                 title = title.replace(link, '');
 
-              case 32:
+                if (!link.includes('vgmdb.net')) {
+                  _context5.next = 37;
+                  break;
+                }
+
+                _context5.next = 35;
+                return getVGMDB(link);
+
+              case 35:
+                info = _context5.sent;
+                if (info) title = info.name;
+
+              case 37:
                 request = {
                   title: title.trim(),
                   link: link,
@@ -368,7 +380,7 @@ module.exports = {
                   catchErr(msg, err);
                 });
 
-              case 34:
+              case 39:
               case "end":
                 return _context5.stop();
             }

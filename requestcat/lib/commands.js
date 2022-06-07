@@ -27,7 +27,7 @@ function _setLockChannel() {
           case 0:
             _context7.next = 2;
             return msg.guild.channels.cache.find(function (c) {
-              return c.name === 'requests-submission';
+              return c.name === 'request-submission';
             }).permissionOverwrites.edit(msg.guild.roles.cache.find(function (r) {
               return r.name === 'Members';
             }), {
@@ -353,7 +353,7 @@ module.exports = {
 
                           if (countPending >= 20) {
                             msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'requests-submission';
+                              return c.name === 'request-submission';
                             }).send('Requests closed');
                             setLockChannel(msg, false);
                           }

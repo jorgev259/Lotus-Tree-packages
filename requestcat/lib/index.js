@@ -15,12 +15,13 @@ module.exports = {
   events: {
     ready: function ready(globals) {
       return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-        var config;
+        var configFile, client, config, guild;
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                config = globals.configFile.sequelize;
+                configFile = globals.configFile, client = globals.client;
+                config = configFile.sequelize;
                 config.database = 'soc';
                 globals.socdb = new Sequelize(config);
                 globals.socdb.define('request', {
@@ -45,8 +46,15 @@ module.exports = {
                   comments: DataTypes.STRING,
                   message: DataTypes.STRING
                 });
+                _context.next = 7;
+                return client.guilds.fetch('496366337036255242');
 
-              case 4:
+              case 7:
+                guild = _context.sent;
+                _context.next = 10;
+                return guild.channel.fetch();
+
+              case 10:
               case "end":
                 return _context.stop();
             }

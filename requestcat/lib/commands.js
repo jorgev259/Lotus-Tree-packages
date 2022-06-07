@@ -360,7 +360,7 @@ module.exports = {
                     while (1) {
                       switch (_context4.prev = _context4.next) {
                         case 0:
-                          if (donator) {
+                          if (!donator) {
                             _context4.next = 2;
                             break;
                           }

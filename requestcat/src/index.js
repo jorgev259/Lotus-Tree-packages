@@ -29,8 +29,10 @@ module.exports = {
         message: DataTypes.STRING
       })
 
-      const guild = await client.guilds.fetch('496366337036255242')
-      await guild.channels.fetch()
+      try {
+        const guild = await client.guilds.fetch('496366337036255242')
+        await guild.channels.fetch()
+      } catch (err) {}
     }
   }
 }

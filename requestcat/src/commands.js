@@ -58,7 +58,7 @@ module.exports = {
 
         request.reason = param.slice(2).join(' ')
         await request.save()
-        await talkChannel.send(`The request ${request.title}${request.link ? ` (${request.link})` : ''} from <@${request.userID}> has been put ON HOLD.\nReason: ${request.reason}`)
+        await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" has been put ON HOLD.\nReason: ${request.reason} <@${request.userID}>`)
 
         if (request.message) await editEmbed(msg, request)
       })
@@ -145,48 +145,44 @@ module.exports = {
     }
   },
 
-  /* complete: {
+  complete: {
     desc: 'Marks a request as completed.',
     usage: 'complete [id]',
-    async execute (client, msg, param, sequelize) {
-      if (!param[1]) return msg.channel.send('Incomplete command.')
+    async execute ({ param, socdb }, { message: msg }) {
+      if (!param[1]) return msg.reply('Incomplete command.')
 
-      const req = (await getId(client, param[1], true))[0]
-      if (!req) return msg.channel.send('Request not found.')
+      const request = await socdb.models.request.findByPk(param[1])
+      if (!request) return msg.reply('Request not found')
+      if (request.state === 'complete') return msg.reply('Request already complete')
 
-      await sequelize.models.request.create({
-        user: req['User ID'],
-        request: `${req.Request}${req.Link ? ` (${req.Link})` : ''}`,
-        valid: true
+      socdb.transaction(async transaction => {
+        const reqMsg = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+        await reqMsg.delete()
+
+        request.state = 'complete'
+        await request.save()
       })
+        .then(async () => {
+          try {
+            const member = await msg.guild.members.fetch(request.userID)
+            const donator = member.roles.cache.some(r => r.name === 'Donators')
 
-      const sheetRequests = doc.sheetsByIndex[0]
-      const rows = await sheetRequests.getRows()
-      rows.find(e => e.ID === req.ID.toString()).delete()
+            if (donator) return
 
-      msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(req.Message).then(async m => {
-        await m.delete()
-        msg.guild.channels.cache.find(c => c.name === 'requests-log').send(`Request: ${req.Request}\nBy: <@${req.User}>\nState: Completed by ${msg.author}`)
-        msg.guild.channels.cache.find(c => c.name === 'last-added-soundtracks').send(`<@${req.User}`).then(m2 => m2.delete())
-        const dm = await msg.guild.members.fetch(req.User)
-        dm.send(`Your request '${req.Request}' has been uploaded!`).catch(e => {
-          msg.guild.channels.cache.find(c => c.name === 'last-added-soundtracks').send(`<@${req.User}>`).then(m2 => m2.delete())
+            const countPending = await getPendingCount(socdb)
+            if (countPending < 20) {
+              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
+              setLockChannel(msg, true)
+            }
+          } catch (err) {
+            catchErr(msg, err)
+          }
         })
-
-        doc.useServiceAccountAuth(configFile.requestcat.google)
-        await doc.loadInfo()
-        const sheetComplete = doc.sheetsByIndex[2]
-
-        sheetComplete.addRow([param[1], req.name || req.Request, (await msg.guild.members.fetch(req.User)).user.tag, req.User, req.vgmdb || '', moment().format('D/M/YYYY')])
-
-        if (req.donator === 'NO') {
-          const sheetRequests = doc.sheetsByIndex[0]
-          const rows = await sheetRequests.getRows()
-          rows.find(e => e.ID === param[1].toString()).delete()
-        }
-      })
+        .catch(err => {
+          catchErr(msg, err)
+        })
     }
-  }, */
+  },
 
   reject: {
     desc: 'Marks a request as rejected',

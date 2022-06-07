@@ -360,10 +360,18 @@ module.exports = {
                     while (1) {
                       switch (_context4.prev = _context4.next) {
                         case 0:
-                          _context4.next = 2;
-                          return getPendingCount(socdb);
+                          if (donator) {
+                            _context4.next = 2;
+                            break;
+                          }
+
+                          return _context4.abrupt("return");
 
                         case 2:
+                          _context4.next = 4;
+                          return getPendingCount(socdb);
+
+                        case 4:
                           countPending = _context4.sent;
 
                           if (countPending >= 20) {
@@ -373,7 +381,7 @@ module.exports = {
                             setLockChannel(msg, false);
                           }
 
-                        case 4:
+                        case 6:
                         case "end":
                           return _context4.stop();
                       }

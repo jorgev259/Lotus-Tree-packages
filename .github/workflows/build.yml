@@ -8,19 +8,19 @@ on:
 
 jobs:
   command-handler:
-    uses: ./.github/workflows/action
+    uses: ./.github/workflows/action.yml
     secrets: inherit
     with:
       folder: 'command-handler'
   
   fg-notation:
-    uses: ./.github/workflows/action
+    uses: ./.github/workflows/action.yml
     secrets: inherit
     with:
       folder: 'fg-notation'
 
   requestcat:
-    uses: ./.github/workflows/action
+    uses: ./.github/workflows/action.yml
     secrets: inherit
     with:
       folder: 'requestcat'

@@ -30,7 +30,7 @@ module.exports = {
       })
 
       const guild = await client.guilds.fetch('496366337036255242')
-      await guild.channel.fetch()
+      await guild.channels.fetch()
     }
   }
 }

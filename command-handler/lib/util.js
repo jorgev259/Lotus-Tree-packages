@@ -90,7 +90,7 @@ module.exports = {
                     name = row.name;
                 var match = category === 'user' && (message.author.id === name || user) || category === 'role' && (message.member.roles.cache.find(function (r) {
                   return r.name === name;
-                }) || role) || category === 'channel' && (message.channel.id === name || channel);
+                }) || role) || category === 'channel' && (message.channel.name === name || channel);
                 if (match) return {
                   v: type === 'allow'
                 };

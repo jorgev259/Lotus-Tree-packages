@@ -6,7 +6,9 @@ module.exports = {
   commands: require('./commands'),
   events: {
     async ready (globals) {
-      const config = globals.configFile.sequelize
+      const { configFile, client } = globals
+      const config = configFile.sequelize
+
       config.database = 'soc'
 
       globals.socdb = new Sequelize(config)
@@ -26,6 +28,9 @@ module.exports = {
         comments: DataTypes.STRING,
         message: DataTypes.STRING
       })
+
+      const guild = await client.guilds.fetch('496366337036255242')
+      await guild.channel.fetch()
     }
   }
 }

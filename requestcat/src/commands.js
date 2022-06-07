@@ -4,7 +4,7 @@ import { get } from 'axios'
 import getUrls from 'get-urls'
 
 async function setLockChannel (msg, value) {
-  await msg.guild.channels.cache.find(c => c.name === 'requests-submission')
+  await msg.guild.channels.cache.find(c => c.name === 'request-submission')
     .permissionOverwrites.edit(msg.guild.roles.cache.find(r => r.name === 'Members'), { SEND_MESSAGES: value })
 }
 
@@ -134,7 +134,7 @@ module.exports = {
         .then(async () => {
           const countPending = await getPendingCount(socdb)
           if (countPending >= 20) {
-            msg.guild.channels.cache.find(c => c.name === 'requests-submission').send('Requests closed')
+            msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests closed')
             setLockChannel(msg, false)
           }
         })

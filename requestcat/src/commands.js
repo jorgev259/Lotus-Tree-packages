@@ -134,6 +134,7 @@ module.exports = {
       socdb.transaction(async transaction => {
         const row = await socdb.models.request.create(request)
         await sendEmbed(msg, row)
+        msg.reply('Request submitted')
       })
         .then(async () => {
           const countPending = await getPendingCount(socdb)

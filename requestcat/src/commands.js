@@ -137,6 +137,8 @@ module.exports = {
         msg.reply('Request submitted')
       })
         .then(async () => {
+          if (!donator) return
+
           const countPending = await getPendingCount(socdb)
           if (countPending >= 20) {
             msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests closed')

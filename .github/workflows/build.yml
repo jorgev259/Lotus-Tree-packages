@@ -8,17 +8,20 @@ on:
 
 jobs:
   command-handler:
-    uses: ./buildAction
+    uses: ./.github/workflows/action
+    secrets: inherit
     with:
       folder: 'command-handler'
   
   fg-notation:
-    uses: ./buildAction
+    uses: ./.github/workflows/action
+    secrets: inherit
     with:
       folder: 'fg-notation'
 
   requestcat:
-    uses: ./buildAction
+    uses: ./.github/workflows/action
+    secrets: inherit
     with:
       folder: 'requestcat'
 

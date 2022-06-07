@@ -1,86 +1,20 @@
 // const moment = require('moment')
-const { get } = require('axios')
-const getUrls = require('get-urls')
-const { GoogleSpreadsheet } = require('google-spreadsheet')
-
-const doc = new GoogleSpreadsheet('1D7X2YXffGGeLUKM9D_Q0lypuKisDuXsb3Yyj-cySiHQ')
-const pages = { requests: 0, donators: 1, hold: 2 }
-
-const getPage = name => doc.sheetsByIndex[pages[name]]
-const getRows = name => getPage(name).getRows()
-
-async function getMaxId (doc) {
-  const requestRows = (await getRows('requests')).map(e => e.ID)
-  const donators = (await getRows('donators')).map(e => e.ID)
-  const hold = (await getPage('hold').getRows()).map(e => e.ID)
-
-  return Math.max(...[...requestRows, ...donators, ...hold])
-}
-
-async function checkPerms (msg, configFile) {
-  if (getPage('requests').rowCount >= configFile.requestcat.count) {
-    await msg.guild.channels.cache.find(c => c.name === 'requests-submission')
-      .edit({
-        data: {
-          permissionOverwrites: [{ id: msg.guild.roles.cache.find(r => r.name === 'Members'), deny: 'SEND_MESSAGES' }]
-        }
-      })
-  }
-}
-
-async function getAllRows () {
-  const requestRows = await getRows('requests')
-  const holdRows = (await getRows('hold')).map(r => {
-    r.hold = true
-    return r
-  })
-  const donatorRows = (await getRows('donators')).map(r => {
-    r.donator = true
-    return r
-  })
-
-  return [...requestRows, ...donatorRows, ...holdRows].sort((a, b) => a.ID - b.ID)
-}
-
-async function getId (id) {
-  const rows = await getAllRows()
-  return rows.find(r => r.ID === id)
-}
+import { Op } from 'sequelize'
+import { get } from 'axios'
 
 module.exports = {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
-    async execute ({ client, configFile, sequelize }, { message }) {
-      doc.useServiceAccountAuth(configFile.requestcat.google)
-      await doc.loadInfo()
+    async execute ({ client, configFile, socdb }, { message }) {
+      const requests = await socdb.models.request.findAll({ where: { state: { [Op.not]: 'complete' } } })
+      let request = requests.shift()
 
-      const rows = await getAllRows()
-      runId(rows)
+      while (request) {
+        if (!request) return
 
-      function runId (ids) {
-        if (!ids[0]) return
-        const row = ids[0]
-
-        const info = {
-          request: row.Request,
-          user: row['User ID'],
-          id: row.ID,
-          oldMessage: row.Message,
-          hold: row.hold,
-          donator: row.donator
-        }
-
-        if (row.Link) {
-          const filterUrls = row.Link.split(' ').filter(e => e.includes('vgmdb.net'))
-          if (filterUrls.length > 0) info.vgmdb = filterUrls[0].replace('vgmdb.net', 'vgmdb.info').replace('(', '').replace(')', '')
-        }
-
-        sendEmbed(message, sequelize, info, row)
-          .then(() => {
-            ids.shift()
-            runId(ids)
-          })
+        await sendEmbed(message, request)
+        request = requests.shift()
       }
     }
   },
@@ -88,7 +22,7 @@ module.exports = {
   pending: {
     desc: 'Shows how many pending requests you have.',
     async execute ({ sequelize, configFile }, { message: msg }) {
-      doc.useServiceAccountAuth(configFile.requestcat.google)
+      /* doc.useServiceAccountAuth(configFile.requestcat.google)
       await doc.loadInfo()
 
       const filterFn = r => r['User ID'] === msg.author.id
@@ -96,7 +30,7 @@ module.exports = {
       const donators = (await getRows('donators')).filter(filterFn).length
       const hold = (await getRows('hold')).filter(filterFn).length
 
-      msg.reply(`Pending: ${requests + donators}\nOn Hold: ${hold}`)
+      msg.reply(`Pending: ${requests + donators}\nOn Hold: ${hold}`) */
     }
   },
 
@@ -151,10 +85,12 @@ module.exports = {
     desc: 'Request a soundtrack',
     usage: 'request [url or name]',
     async execute ({ param, configFile, sequelize }, { message: msg }) {
-      if (!param[1]) return msg.channel.send('Please provide a url or name')
+      /* if (!param[1]) return msg.channel.send('Please provide a url or name')
 
       doc.useServiceAccountAuth(configFile.requestcat.google)
       await doc.loadInfo()
+
+      console.log(123)
 
       const donator = msg.member.roles.cache.some(r => r.name === 'Donators')
       const owner = msg.member.roles.cache.some(r => r.name === 'Owner')
@@ -198,6 +134,7 @@ module.exports = {
           checkPerms(msg, configFile)
         })
         .catch(err => catchErr(msg, err))
+         */
     }
   },
 
@@ -248,7 +185,7 @@ module.exports = {
     desc: 'Marks a request as rejected',
     usage: 'reject [id] [reason]',
     async execute ({ client, param, sequelize, configFile }, { message: msg }) {
-      if (!param[2]) return msg.channel.send('Incomplete command.')
+      /* if (!param[2]) return msg.channel.send('Incomplete command.')
 
       doc.useServiceAccountAuth(configFile.requestcat.google)
       await doc.loadInfo()
@@ -261,7 +198,7 @@ module.exports = {
       /* sequelize.models.request.create({ user: req.User, request: req.Request, valid: false })
       if (req.Link && req.Link.includes('vgmdb.net')) {
         sequelize.models.vgmdb.destroy({ where: { url: req.Link } })
-      } */
+      }
 
       const messageId = req.Message
       await req.delete()
@@ -272,6 +209,7 @@ module.exports = {
       msg.guild.channels.cache.find(c => c.name === 'requests-log').send(`Request: ${req.Request}\nBy: <@${req.User}>\nState: Rejected by ${msg.author}\nReason: ${reason}`)
       const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
       talkChannel.send(`The request ${req.Request} from <@${req.User}> has been rejected.\nReason: ${reason}`)
+      */
     }
   }
 }
@@ -304,38 +242,66 @@ function handleVGMDB (info, sequelize) {
   })
 }
 
-async function sendEmbed (msg, sequelize, info, row) {
-  await handleOldMessage(msg, info.oldMessage)
-  if (info.vgmdb) info = await handleVGMDB(info, sequelize)
+async function getVGMDB (link) {
+  const url = new URL(link)
+  const id = url.pathname.split('/').slice(-1)
+
+  try {
+    const response = await get(
+    `https://api.nemoralni.site/albums/${id}`,
+    { headers: { 'x-api-key': 'i-m-a-pig-i-don-t-fight-for-honor-i-fight-for-a-paycheck' } })
+    return response.data
+  } catch {}
+}
+
+const isValidUrl = s => {
+  try {
+    const testUrl = new URL(s)
+    return !!testUrl
+  } catch (err) {
+    return false
+  }
+}
+
+async function getCover (link) {
+  const data = await getVGMDB(link)
+  if (!data) return
+
+  const cover = data.album_cover
+
+  if (isValidUrl(cover)) return { url: cover }
+}
+
+async function sendEmbed (msg, request) {
+  let image
+  const isHold = request.state === 'hold'
+
+  if (request.link?.includes('vgmdb.net')) image = await getCover(request.link)
 
   const embed = {
     fields: [
       {
         name: 'Request',
-        value: `${info.request}${info.url ? ` (${info.url})` : ''}${info.hold ? ' **(ON HOLD)**' : ''}`
+        value: `${request.title}${request.url ? ` (${request.url})` : ''}${isHold ? ' **(ON HOLD)**' : ''}`
       },
       {
         name: 'Requested by',
-        value: `<@${info.user}> / ${info.user}`,
+        value: `<@${request.userID}> / ${request.userID}`,
         inline: true
       },
       {
         name: 'ID',
-        value: info.id?.toString() || 'NOT FOUND',
+        value: request.id.toString(),
         inline: true
       }
     ],
-    color: info.donator ? 0xedcd40 : (info.hold ? 0xc20404 : 0x42bfed),
-    image: info.image
+    color: request.donator ? 0xedcd40 : (isHold ? 0xc20404 : 0x42bfed),
+    image
   }
 
   const sent = await msg.guild.channels.cache.find(c => c.name === 'open-requests').send({ embeds: [embed] })
-  if (row) {
-    row.Message = sent.id
-    await row.save()
-  }
-
-  return sent
+  request.message = sent.id
+  await request.save()
 }
 
 /* function handleVGMDBImage (url, embed) {

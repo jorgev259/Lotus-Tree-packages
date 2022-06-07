@@ -1,12 +1,20 @@
 // const moment = require('moment')
 import { Op } from 'sequelize'
 import { get } from 'axios'
+import getUrls from 'get-urls'
+
+async function setLockChannel (msg, value) {
+  await msg.guild.channels.cache.find(c => c.name === 'requests-submission')
+    .permissionOverwrites.edit(msg.guild.roles.cache.find(r => r.name === 'Members'), { SEND_MESSAGES: value })
+}
+
+const getPendingCount = socdb => socdb.models.request.count({ where: { state: 'pending', donator: false } })
 
 module.exports = {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
-    async execute ({ client, configFile, socdb }, { message }) {
+    async execute ({ socdb }, { message }) {
       const requests = await socdb.models.request.findAll({ where: { state: { [Op.not]: 'complete' } } })
       let request = requests.shift()
 
@@ -85,57 +93,54 @@ module.exports = {
   request: {
     desc: 'Request a soundtrack',
     usage: 'request [url or name]',
-    async execute ({ param, configFile, sequelize }, { message: msg }) {
-      /* if (!param[1]) return msg.channel.send('Please provide a url or name')
-
-      doc.useServiceAccountAuth(configFile.requestcat.google)
-      await doc.loadInfo()
-
-      console.log(123)
+    async execute ({ param, socdb }, { message: msg }) {
+      if (!param[1]) return msg.channel.send('Please provide a url or name')
 
       const donator = msg.member.roles.cache.some(r => r.name === 'Donators')
       const owner = msg.member.roles.cache.some(r => r.name === 'Owner')
 
       const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
       if (!(donator || owner)) {
-        const rows = await getRows('requests')
-        const reqs = rows.filter(e => e['User ID'] === msg.author.id)
+        const pending = await socdb.models.request.findOne({ where: { userID: msg.author.id, state: 'pending' } })
+        if (pending) return talkChannel.send(`The request '${pending.title} ${pending.url ? `(${pending.url})` : ''}' is still on place. Wait until its fulfilled or rejected ${msg.author}`)
 
-        if (reqs.length > 0) return talkChannel.send(`The request '${reqs[0].Request} ${reqs[0].Link ? `(${reqs[0].Link})` : ''}' is still on place. Wait until its fulfilled or rejected.`)
-        if (getPage('requests').rowCount >= configFile.requestcat.count) {
-          checkPerms(msg, configFile)
+        const countPending = await getPendingCount(socdb)
+        if (countPending >= 20) {
+          await setLockChannel(msg, false)
           return msg.channel.send('There are too many open requests right now. Wait until slots are opened.')
         }
       }
-      let request = param.slice(1).join(' ')
 
-      const urls = Array.from(getUrls(request, { normalizeProtocol: false, stripWWW: false, removeTrailingSlash: false, sortQueryParameters: false }))
+      let title = param.slice(1).join(' ')
+
+      const urls = Array.from(getUrls(title, { normalizeProtocol: false, stripWWW: false, removeTrailingSlash: false, sortQueryParameters: false }))
       if (urls.length > 1) return msg.channel.send('You can only specify one url per request.')
 
-      const url = urls[0]
+      const link = urls[0]
 
       if (urls.length > 0) {
-        // const row = await sequelize.models.vgmdb.findByPk(url)
-        // if (row) return talkChannel.send(`This soundtrack has already been requested (${url})`)
+        const checkUrl = await socdb.models.request.findOne({ where: { link } })
+        if (checkUrl) return talkChannel.send(`This soundtrack has already been requested: ${link}`)
 
-        request = request.replace(url, '')
+        title = title.replace(link, '')
       }
 
-      const info = { id: await getMaxId(doc) + 1, request: request.trim(), url, user: msg.author.id, donator }
+      const request = { title: title.trim(), link, user: msg.author.tag, userID: msg.author.id, donator, state: 'pending' }
 
-      if (url && url.includes('vgmdb.net')) info.vgmdb = url
-
-      sendEmbed(msg, sequelize, info)
-        .then(async m => {
-          msg.channel.send('Request submitted.')
-
-          const page = donator ? getPage('donators') : getPage('requests')
-          await page.addRow([info.id, info.request, msg.author.tag, info.user, info.url, m.id])
-
-          checkPerms(msg, configFile)
+      socdb.transaction(async transaction => {
+        const row = await socdb.models.request.create(request)
+        await sendEmbed(msg, row)
+      })
+        .then(async () => {
+          const countPending = await getPendingCount(socdb)
+          if (countPending >= 20) {
+            msg.guild.channels.cache.find(c => c.name === 'requests-submission').send('Requests closed')
+            setLockChannel(msg, false)
+          }
         })
-        .catch(err => catchErr(msg, err))
-         */
+        .catch(err => {
+          catchErr(msg, err)
+        })
     }
   },
 

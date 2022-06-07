@@ -137,7 +137,7 @@ module.exports = {
         msg.reply('Request submitted')
       })
         .then(async () => {
-          if (!donator) return
+          if (donator) return
 
           const countPending = await getPendingCount(socdb)
           if (countPending >= 20) {

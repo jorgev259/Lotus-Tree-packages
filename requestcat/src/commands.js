@@ -123,6 +123,10 @@ module.exports = {
         if (checkUrl) return talkChannel.send(`This soundtrack has already been requested: ${link}`)
 
         title = title.replace(link, '')
+        if (link.includes('vgmdb.net')) {
+          const info = await getVGMDB(link)
+          if (info) title = info.name
+        }
       }
 
       const request = { title: title.trim(), link, user: msg.author.tag, userID: msg.author.id, donator, state: 'pending' }

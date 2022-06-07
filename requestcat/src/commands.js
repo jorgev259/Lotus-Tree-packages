@@ -43,52 +43,46 @@ module.exports = {
     }
   },
 
-  /* hold: {
+  hold: {
     desc: 'Marks a request as ON HOLD.',
     usage: 'hold [id] [reason]',
-    async execute (client, msg, param, sequelize) {
-      if (!param[2]) return msg.channel.send('Incomplete command.')
+    async execute ({ param, socdb }, { message: msg }) {
+      if (!param[2]) return msg.reply('Incomplete command.')
 
-      const req = (await getId(client, param[1]))[0]
-      if (!req) return msg.channel.send('Request not found.')
+      const request = await socdb.models.request.findByPk(param[1])
+      if (!request) return msg.reply('Request not found')
+      if (request.state === 'hold') return msg.reply('Request already on hold')
 
-      const reason = param.slice(2).join(' ')
+      socdb.transaction(async transaction => {
+        const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
 
-      const info = {
-        request: req.Request,
-        user: req['User ID'],
-        hold: true,
-        id: req.ID,
-        msg: req.Message,
-        url: req.Link
-      }
+        request.reason = param.slice(2).join(' ')
+        await request.save()
+        await talkChannel.send(`The request ${request.title}${request.link ? ` (${request.link})` : ''} from <@${request.userID}> has been put ON HOLD.\nReason: ${request.reason}`)
 
-      editEmbed(msg, sequelize, info)
-        .then(async m => {
-          const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
-          msg.guild.channels.cache.find(c => c.name === 'requests-log').send(`Request: ${info.request}\nBy: <@${info.user}>\nState: ON HOLD by ${msg.author}\nReason: ${reason}`)
+        if (request.message) await editEmbed(msg, request)
+      })
+        .then(async () => {
+          try {
+            const member = await msg.guild.members.fetch(request.userID)
+            const donator = member.roles.cache.some(r => r.name === 'Donators')
 
-          talkChannel.send(`The request ${info.request}${info.url ? ` (${info.url})` : ''} from <@${info.user}> has put ON HOLD.\nReason: ${reason}`)
+            if (donator) return
 
-          doc.useServiceAccountAuth(configFile.requestcat.google)
-          await doc.loadInfo()
-          const sheetHold = doc.sheetsByIndex[2]
-          const sheetRequests = doc.sheetsByIndex[0]
-
-          let userTag = ''
-          msg.guild.members.fetch(info.user).then(member => {
-            userTag = member.user.tag
-          }).finally(async () => {
-            sheetHold.addRow([info.id, info.request, userTag, info.user, req.Link, m.id])
-
-            const rows = await sheetRequests.getRows()
-            const row = rows.find(e => e.ID === info.id.toString())
-            await row.delete()
-          })
+            const countPending = await getPendingCount(socdb)
+            if (countPending < 20) {
+              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
+              setLockChannel(msg, true)
+            }
+          } catch (err) {
+            catchErr(msg, err)
+          }
         })
-        .catch(err => catchErr(msg, err))
+        .catch(err => {
+          catchErr(msg, err)
+        })
     }
-  }, */
+  },
 
   request: {
     desc: 'Request a soundtrack',
@@ -132,7 +126,7 @@ module.exports = {
       const request = { title: title.trim(), link, user: msg.author.tag, userID: msg.author.id, donator, state: 'pending' }
 
       socdb.transaction(async transaction => {
-        const row = await socdb.models.request.create(request)
+        const row = await socdb.models.request.create(request, { transaction })
         await sendEmbed(msg, row)
         msg.reply('Request submitted')
       })
@@ -227,34 +221,6 @@ module.exports = {
   }
 }
 
-function handleOldMessage (msg, oldMessage) {
-  return new Promise(resolve => {
-    if (!oldMessage) resolve()
-    msg.guild.channels.cache.find(c => c.name === 'open-requests')
-      .messages.fetch(oldMessage)
-      .then(oldMessage => oldMessage.delete())
-      .then(resolve)
-      .catch(resolve)
-  })
-}
-
-function handleVGMDB (info, sequelize) {
-  return new Promise(resolve => {
-    get(info.vgmdb.replace('vgmdb.net', 'vgmdb.info'))
-      .then(({ data }) => {
-        info.image = { url: data.picture_small }
-        const vgmdbUrl = `https://vgmdb.net/${data.link}`
-        info.request = data.name
-        info.url = vgmdbUrl
-
-        resolve(info)
-
-        // sequelize.models.vgmdb.findOrCreate({ where: { url: vgmdbUrl } })
-      })
-      .catch(() => resolve(info))
-  })
-}
-
 async function getVGMDB (link) {
   const url = new URL(link)
   const id = url.pathname.split('/').slice(-1)
@@ -285,13 +251,13 @@ async function getCover (link) {
   if (isValidUrl(cover)) return { url: cover }
 }
 
-async function sendEmbed (msg, request) {
+async function getEmbed (request) {
   let image
   const isHold = request.state === 'hold'
 
   if (request.link?.includes('vgmdb.net')) image = await getCover(request.link)
 
-  const embed = {
+  return {
     fields: [
       {
         name: 'Request',
@@ -311,49 +277,22 @@ async function sendEmbed (msg, request) {
     color: request.donator ? 0xedcd40 : (isHold ? 0xc20404 : 0x42bfed),
     image
   }
+}
+
+async function sendEmbed (msg, request) {
+  const embed = await getEmbed(request)
 
   const sent = await msg.guild.channels.cache.find(c => c.name === 'open-requests').send({ embeds: [embed] })
   request.message = sent.id
   await request.save()
 }
 
-/* function handleVGMDBImage (url, embed) {
-  return new Promise(resolve => {
-    get(url.replace('vgmdb.net', 'vgmdb.info'))
-      .then(({ data }) => {
-        embed.image = { url: data.picture_small }
-      })
-      .finally(() => resolve(embed))
-  })
-}
+async function editEmbed (msg, request) {
+  const embed = await getEmbed(request)
 
- async function editEmbed (msg, sequelize, info) {
-  let embed = {
-    fields: [
-      {
-        name: 'Request',
-        value: `${info.request}${info.url ? ` (${info.url})` : ''}${info.hold ? ' **(ON HOLD)**' : ''}`
-      },
-      {
-        name: 'Requested by',
-        value: `<@${info.user}> / ${info.user}`,
-        inline: true
-      },
-      {
-        name: 'ID',
-        value: info.id && info.length > 0 ? info.id : 'NOT FOUND',
-        inline: true
-      }
-    ],
-    color: info.donator ? 0xedcd40 : (info.hold ? 0xc20404 : 0x42bfed)
-  }
-
-  if (info.url && info.url.includes('vgmdb.net')) embed = await handleVGMDBImage(info.url, embed)
-
-  const m = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(info.msg)
+  const m = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
   await m.edit({ embed })
-  return m
-} */
+}
 
 function catchErr (msg, err) {
   console.log(err)

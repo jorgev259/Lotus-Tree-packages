@@ -464,7 +464,7 @@ function _sendEmbed() {
             embed = {
               fields: [{
                 name: 'Request',
-                value: "".concat(request.title).concat(request.url ? " (".concat(request.url, ")") : '').concat(isHold ? ' **(ON HOLD)**' : '')
+                value: "".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '').concat(isHold ? ' **(ON HOLD)**' : '')
               }, {
                 name: 'Requested by',
                 value: "<@".concat(request.userID, "> / ").concat(request.userID),

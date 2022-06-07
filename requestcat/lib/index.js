@@ -52,7 +52,7 @@ module.exports = {
               case 7:
                 guild = _context.sent;
                 _context.next = 10;
-                return guild.channel.fetch();
+                return guild.channels.fetch();
 
               case 10:
               case "end":

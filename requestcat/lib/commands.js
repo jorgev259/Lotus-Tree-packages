@@ -341,6 +341,9 @@ module.exports = {
                             return sendEmbed(msg, row);
 
                           case 5:
+                            msg.reply('Request submitted');
+
+                          case 6:
                           case "end":
                             return _context3.stop();
                         }

@@ -1,0 +1,13 @@
+{
+  "name": "@lotus-tree/mc-status",
+  "version": "1.0.5",
+  "main": "index.js",
+  "module": "index.js",
+  "scripts": {
+    "build": "exit 0",
+    "dev": "exit 0"
+  },
+  "dependencies": {
+    "minecraft-server-util": "^5.2.8"
+  }
+}

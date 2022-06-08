@@ -2,12 +2,16 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+var _typeof = require("@babel/runtime/helpers/typeof");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
@@ -25,7 +29,17 @@ var _sequelize = require("sequelize");
 
 var _bent = _interopRequireDefault(require("bent"));
 
+var _axios = _interopRequireDefault(require("axios"));
+
 var _info = require("./info.json");
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 var getJSON = (0, _bent["default"])('json');
 
@@ -35,6 +49,9 @@ var basicInputs = new Map();
 var gameInputs = new Map();
 var glossary = {};
 var terms = [];
+
+var grabs = _glob["default"].sync(_path["default"].join(imgPath, 'grabs/**.png'));
+
 getGlossary();
 setInterval(getGlossary, 5 * 60 * 1000);
 
@@ -43,17 +60,17 @@ function getGlossary() {
 }
 
 function _getGlossary() {
-  _getGlossary = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6() {
+  _getGlossary = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
     var result, tempG, tempT;
-    return _regenerator["default"].wrap(function _callee6$(_context6) {
+    return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
-            _context6.next = 2;
+            _context7.next = 2;
             return getJSON('https://glossary.infil.net/json/glossary.json');
 
           case 2:
-            result = _context6.sent;
+            result = _context7.sent;
             tempG = {};
             tempT = [];
             result.forEach(function (i) {
@@ -66,10 +83,10 @@ function _getGlossary() {
 
           case 8:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
       }
-    }, _callee6);
+    }, _callee7);
   }));
   return _getGlossary.apply(this, arguments);
 }
@@ -138,11 +155,11 @@ function sendInput(_x, _x2, _x3, _x4) {
 }
 
 function _sendInput() {
-  _sendInput = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(inputs, result, message, caption) {
+  _sendInput = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(inputs, result, message, caption) {
     var width, images, left, canvas;
-    return _regenerator["default"].wrap(function _callee7$(_context7) {
+    return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
             width = result.map(function (it) {
               return _info.sizes[it] || 152;
@@ -168,37 +185,37 @@ function _sendInput() {
                 background: 'transparent'
               }
             }).png().composite(images);
-            _context7.next = 7;
+            _context8.next = 7;
             return canvas.toBuffer();
 
           case 7:
-            canvas = _context7.sent;
+            canvas = _context8.sent;
 
             if (!(result.length < 12)) {
-              _context7.next = 12;
+              _context8.next = 12;
               break;
             }
 
-            _context7.next = 11;
+            _context8.next = 11;
             return (0, _sharp["default"])(canvas).resize({
               height: 55
             }).png().toBuffer();
 
           case 11:
-            canvas = _context7.sent;
+            canvas = _context8.sent;
 
           case 12:
-            return _context7.abrupt("return", message.reply({
+            return _context8.abrupt("return", message.reply({
               content: caption,
               files: [canvas]
             }));
 
           case 13:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7);
+    }, _callee8);
   }));
   return _sendInput.apply(this, arguments);
 }
@@ -556,7 +573,173 @@ var _default = {
 
         return execute;
       }()
+    },
+    grab: {
+      usage: 'grab @user',
+      desc: 'Command grab someone',
+      example: 'grab @ChitoWarlock',
+      execute: function () {
+        var _execute5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(_ref9, _ref10) {
+          var param, sequelize, message, mentions, user, mainPath, mainImage, options, avatarImage, mainMetadata, width, height, canvas;
+          return _regenerator["default"].wrap(function _callee6$(_context6) {
+            while (1) {
+              switch (_context6.prev = _context6.next) {
+                case 0:
+                  param = _ref9.param, sequelize = _ref9.sequelize;
+                  message = _ref10.message;
+                  mentions = message.mentions.users;
+
+                  if (!(mentions.size === 0)) {
+                    _context6.next = 5;
+                    break;
+                  }
+
+                  return _context6.abrupt("return", message.reply('You forgot to mention who to grab'));
+
+                case 5:
+                  if (!(mentions.size > 1)) {
+                    _context6.next = 7;
+                    break;
+                  }
+
+                  return _context6.abrupt("return", message.reply('Cannot grab multiple enemies!'));
+
+                case 7:
+                  user = mentions.first();
+                  mainPath = grabs[getRandomInt(0, grabs.length - 1)];
+                  _context6.next = 11;
+                  return (0, _sharp["default"])(mainPath);
+
+                case 11:
+                  mainImage = _context6.sent;
+                  _context6.next = 14;
+                  return Promise.resolve("".concat(mainPath.replace('.png', '.json'))).then(function (s) {
+                    return _interopRequireWildcard(require(s));
+                  });
+
+                case 14:
+                  options = _context6.sent;
+                  _context6.t0 = _sharp["default"];
+                  _context6.next = 18;
+                  return getBuffer(user.displayAvatarURL({
+                    format: 'png'
+                  }));
+
+                case 18:
+                  _context6.t1 = _context6.sent;
+                  _context6.next = 21;
+                  return (0, _context6.t0)(_context6.t1).resize(options.resize).rotate(options.rotate, {
+                    background: {
+                      r: 0,
+                      g: 0,
+                      b: 0,
+                      alpha: 0
+                    }
+                  });
+
+                case 21:
+                  avatarImage = _context6.sent;
+                  _context6.next = 24;
+                  return mainImage.metadata();
+
+                case 24:
+                  mainMetadata = _context6.sent;
+                  width = mainMetadata.width, height = mainMetadata.height;
+                  _context6.t2 = newCanvas(width, height);
+                  _context6.t3 = _objectSpread;
+                  _context6.next = 30;
+                  return avatarImage.toBuffer();
+
+                case 30:
+                  _context6.t4 = _context6.sent;
+                  _context6.t5 = {
+                    input: _context6.t4
+                  };
+                  _context6.t6 = options.composite;
+                  _context6.t7 = (0, _context6.t3)(_context6.t5, _context6.t6);
+                  _context6.next = 36;
+                  return mainImage.toBuffer();
+
+                case 36:
+                  _context6.t8 = _context6.sent;
+                  _context6.t9 = {
+                    input: _context6.t8
+                  };
+                  _context6.t10 = [_context6.t7, _context6.t9];
+                  _context6.next = 41;
+                  return _context6.t2.composite.call(_context6.t2, _context6.t10).png().toBuffer();
+
+                case 41:
+                  canvas = _context6.sent;
+                  message.reply({
+                    files: [canvas]
+                  });
+
+                case 43:
+                case "end":
+                  return _context6.stop();
+              }
+            }
+          }, _callee6);
+        }));
+
+        function execute(_x13, _x14) {
+          return _execute5.apply(this, arguments);
+        }
+
+        return execute;
+      }()
     }
   }
 };
 exports["default"] = _default;
+
+function getBuffer(_x15) {
+  return _getBuffer.apply(this, arguments);
+}
+
+function _getBuffer() {
+  _getBuffer = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(url) {
+    var input;
+    return _regenerator["default"].wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            _context9.next = 2;
+            return (0, _axios["default"])({
+              url: url,
+              responseType: 'arraybuffer'
+            });
+
+          case 2:
+            input = _context9.sent.data;
+            return _context9.abrupt("return", input);
+
+          case 4:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _getBuffer.apply(this, arguments);
+}
+
+function newCanvas(width, height) {
+  var channels = 4;
+  var rgbaPixel = 0x00000000;
+  var canvas = Buffer.alloc(width * height * channels, rgbaPixel);
+  return (0, _sharp["default"])(canvas, {
+    raw: {
+      width: width,
+      height: height,
+      channels: channels
+    }
+  });
+}
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

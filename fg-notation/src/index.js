@@ -3,6 +3,7 @@ import path from 'path'
 import glob from 'glob'
 import { DataTypes } from 'sequelize'
 import bent from 'bent'
+import axios from 'axios'
 
 import { sizes, aliases, builtin } from './info.json'
 
@@ -13,6 +14,7 @@ const gameInputs = new Map()
 
 let glossary = {}
 let terms = []
+const grabs = glob.sync(path.join(imgPath, 'grabs/**.png'))
 
 getGlossary()
 setInterval(getGlossary, 5 * 60 * 1000)
@@ -244,6 +246,57 @@ export default {
 
         message.reply(`Multiple terms found: ${url}`)
       }
+    },
+    grab: {
+      usage: 'grab @user',
+      desc: 'Command grab someone',
+      example: 'grab @ChitoWarlock',
+      execute: async ({ param, sequelize }, { message }) => {
+        const { users: mentions } = message.mentions
+
+        if (mentions.size === 0) return message.reply('You forgot to mention who to grab')
+        if (mentions.size > 1) return message.reply('Cannot grab multiple enemies!')
+
+        const user = mentions.first()
+
+        const mainPath = grabs[getRandomInt(0, grabs.length - 1)]
+        const mainImage = await sharp(mainPath)
+        const options = await import(mainPath.replace('.png', '.json'))
+        const avatarImage = await sharp(await getBuffer(user.displayAvatarURL({ format: 'png' })))
+          .resize(options.resize)
+          .rotate(options.rotate, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
+
+        const mainMetadata = await mainImage.metadata()
+        const { width, height } = mainMetadata
+
+        const canvas = await newCanvas(width, height)
+          .composite([
+            { input: await avatarImage.toBuffer(), ...options.composite },
+            { input: await mainImage.toBuffer() }
+          ])
+          .png().toBuffer()
+
+        message.reply({ files: [canvas] })
+      }
     }
   }
+}
+
+async function getBuffer (url) {
+  const input = (await axios({ url, responseType: 'arraybuffer' })).data
+  return input
+}
+
+function newCanvas (width, height) {
+  const channels = 4
+  const rgbaPixel = 0x00000000
+  const canvas = Buffer.alloc(width * height * channels, rgbaPixel)
+
+  return sharp(canvas, { raw: { width, height, channels } })
+}
+
+function getRandomInt (min, max) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }

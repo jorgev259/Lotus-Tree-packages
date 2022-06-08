@@ -55,6 +55,10 @@ Follow instructions on how to add to a Louts-Tree bot on [this link](https://git
 
 ## Changelog
 
+### 1.3.0
+- Implemented "grab" command
+- And the infinite one
+
 ### 1.2.0
 
 - Limit image height

@@ -15,6 +15,8 @@ Discord bot that converts fighting game inputs into easy to read images.
 
 \>fgglossary: Searches for a term on [Infil's Fighting Game Glossary](https://glossary.infil.net)
 
+\>grab: Command grab someone
+
 ## Examples
 https://user-images.githubusercontent.com/19596334/149458438-775d2da6-0573-46f3-b7dd-0030adaad124.mp4
 

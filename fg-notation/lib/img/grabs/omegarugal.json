@@ -1,0 +1,5 @@
+{
+  "resize":{"width":213, "height": 213},
+  "rotate": -33,
+  "composite": { "top": 50, "left": 35 }
+}

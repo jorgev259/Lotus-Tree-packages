@@ -46,20 +46,29 @@ module.exports = {
                   comments: DataTypes.STRING,
                   message: DataTypes.STRING
                 });
-                _context.next = 7;
+                _context.prev = 5;
+                _context.next = 8;
                 return client.guilds.fetch('496366337036255242');
 
-              case 7:
+              case 8:
                 guild = _context.sent;
-                _context.next = 10;
+                _context.next = 11;
                 return guild.channels.fetch();
 
-              case 10:
+              case 11:
+                _context.next = 15;
+                break;
+
+              case 13:
+                _context.prev = 13;
+                _context.t0 = _context["catch"](5);
+
+              case 15:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee);
+        }, _callee, null, [[5, 13]]);
       }))();
     }
   }

@@ -1,16 +1,81 @@
-// const moment = require('moment')
 import { Op } from 'sequelize'
 import { get } from 'axios'
 import getUrls from 'get-urls'
+import { Permissions } from 'discord.js'
 
-async function setLockChannel (msg, value) {
-  await msg.guild.channels.cache.find(c => c.name === 'request-submission')
-    .permissionOverwrites.edit(msg.guild.roles.cache.find(r => r.name === 'Members'), { SEND_MESSAGES: value })
+async function checkLockChannel (socdb, guild) {
+  const countPending = await getPendingCount(socdb)
+  const channel = guild.channels.cache.find(c => c.name === 'request-submission')
+  const membersRole = guild.roles.cache.find(r => r.name === 'Members')
+  const permissions = channel.permissionsFor(membersRole)
+
+  if (countPending >= 20 && permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+    await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: false })
+    await channel.send('Requests closed')
+  } else {
+    if (countPending < 20 && !permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+      await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: true })
+      await channel.send('Requests open')
+    }
+  }
 }
 
 const getPendingCount = socdb => socdb.models.request.count({ where: { state: 'pending', donator: false } })
 
-module.exports = {
+export async function completeRequest (client, socdb, guildId, request) {
+  const guild = await client.guilds.fetch(guildId)
+
+  await socdb.transaction(async transaction => {
+    const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+
+    await reqMsg.delete()
+
+    request.state = 'complete'
+    request.message = null
+    await request.save()
+  })
+    .then(() => checkLockChannel(socdb, guild))
+    .catch(err => catchErr(guild, err))
+}
+
+export async function holdRequest (client, socdb, guildId, request, reason) {
+  const guild = await client.guilds.fetch(guildId)
+
+  await socdb.transaction(async transaction => {
+    const talkChannel = guild.channels.cache.find(c => c.name === 'requests-talk')
+
+    request.state = 'hold'
+    request.reason = reason
+    await request.save()
+    await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" has been put ON HOLD.\nReason: ${request.reason} <@${request.userID}>`)
+
+    if (request.message) await editEmbed(guild, request)
+  })
+    .then(() => checkLockChannel(socdb, guild))
+    .catch(err => catchErr(guild, err))
+}
+
+export async function rejectRequest (client, socdb, guildId, request, reason) {
+  const guild = await client.guilds.fetch(guildId)
+
+  await socdb.transaction(async transaction => {
+    const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+    await reqMsg.delete()
+
+    request.state = 'complete'
+    request.reason = reason
+    await request.save()
+  })
+    .then(async () => {
+      const talkChannel = guild.channels.cache.find(c => c.name === 'requests-talk')
+      await talkChannel.send(`The request ${request.title || request.link} from <@${request.userID}> has been rejected.\nReason: ${reason}`)
+
+      await checkLockChannel(socdb, guild)
+    })
+    .catch(err => catchErr(guild, err))
+}
+
+export default {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
@@ -46,41 +111,15 @@ module.exports = {
   hold: {
     desc: 'Marks a request as ON HOLD.',
     usage: 'hold [id] [reason]',
-    async execute ({ param, socdb }, { message: msg }) {
+    async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[2]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
       if (!request) return msg.reply('Request not found')
       if (request.state === 'hold') return msg.reply('Request already on hold')
 
-      socdb.transaction(async transaction => {
-        const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
-
-        request.reason = param.slice(2).join(' ')
-        await request.save()
-        await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" has been put ON HOLD.\nReason: ${request.reason} <@${request.userID}>`)
-
-        if (request.message) await editEmbed(msg, request)
-      })
-        .then(async () => {
-          try {
-            const member = await msg.guild.members.fetch(request.userID)
-            const donator = member.roles.cache.some(r => r.name === 'Donators')
-
-            if (donator) return
-
-            const countPending = await getPendingCount(socdb)
-            if (countPending < 20) {
-              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
-              setLockChannel(msg, true)
-            }
-          } catch (err) {
-            catchErr(msg, err)
-          }
-        })
-        .catch(err => {
-          catchErr(msg, err)
-        })
+      const reason = param.slice(2).join(' ')
+      await holdRequest(client, socdb, configFile.requestcat.guild, request, reason)
     }
   },
 
@@ -100,8 +139,10 @@ module.exports = {
 
         const countPending = await getPendingCount(socdb)
         if (countPending >= 20) {
-          await setLockChannel(msg, false)
-          return msg.channel.send('There are too many open requests right now. Wait until slots are opened.')
+          await msg.channel.send('There are too many open requests right now. Wait until slots are opened.')
+          await checkLockChannel(socdb, msg.guild)
+
+          return
         }
       }
 
@@ -128,66 +169,31 @@ module.exports = {
       socdb.transaction(async transaction => {
         const row = await socdb.models.request.create(request, { transaction })
         await sendEmbed(msg, row)
-        msg.reply('Request submitted')
+        await msg.reply('Request submitted')
       })
-        .then(async () => {
-          if (donator) return
-
-          const countPending = await getPendingCount(socdb)
-          if (countPending >= 20) {
-            msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests closed')
-            setLockChannel(msg, false)
-          }
-        })
-        .catch(err => {
-          catchErr(msg, err)
-        })
+        .then(() => checkLockChannel(socdb, msg.guild))
+        .catch(err => catchErr(msg.guild, err))
     }
   },
 
   complete: {
     desc: 'Marks a request as completed.',
     usage: 'complete [id]',
-    async execute ({ param, socdb }, { message: msg }) {
+    async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[1]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
       if (!request) return msg.reply('Request not found')
       if (request.state === 'complete') return msg.reply('Request already complete')
 
-      socdb.transaction(async transaction => {
-        const reqMsg = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
-        await reqMsg.delete()
-
-        request.state = 'complete'
-        await request.save()
-      })
-        .then(async () => {
-          try {
-            const member = await msg.guild.members.fetch(request.userID)
-            const donator = member.roles.cache.some(r => r.name === 'Donators')
-
-            if (donator) return
-
-            const countPending = await getPendingCount(socdb)
-            if (countPending < 20) {
-              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
-              setLockChannel(msg, true)
-            }
-          } catch (err) {
-            catchErr(msg, err)
-          }
-        })
-        .catch(err => {
-          catchErr(msg, err)
-        })
+      await completeRequest(client, socdb, configFile.requestcat.guild, request)
     }
   },
 
   reject: {
     desc: 'Marks a request as rejected',
     usage: 'reject [id] [reason]',
-    async execute ({ param, socdb }, { message: msg }) {
+    async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[2]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
@@ -195,35 +201,7 @@ module.exports = {
 
       const reason = param.slice(2).join(' ')
 
-      socdb.transaction(async transaction => {
-        const reqMsg = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
-        await reqMsg.delete()
-
-        request.state = 'complete'
-        await request.save()
-      })
-        .then(async () => {
-          const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
-          talkChannel.send(`The request ${request.title || request.link} from <@${request.userID}> has been rejected.\nReason: ${reason}`)
-
-          try {
-            const member = await msg.guild.members.fetch(request.userID)
-            const donator = member.roles.cache.some(r => r.name === 'Donators')
-
-            if (donator) return
-
-            const countPending = await getPendingCount(socdb)
-            if (countPending < 20) {
-              msg.guild.channels.cache.find(c => c.name === 'request-submission').send('Requests open')
-              setLockChannel(msg, true)
-            }
-          } catch (err) {
-            catchErr(msg, err)
-          }
-        })
-        .catch(err => {
-          catchErr(msg, err)
-        })
+      await rejectRequest(client, socdb, configFile.requestcat.guild, request, reason)
     }
   }
 }
@@ -294,14 +272,16 @@ async function sendEmbed (msg, request) {
   await request.save()
 }
 
-async function editEmbed (msg, request) {
+async function editEmbed (guild, request) {
+  const channel = guild.channels.cache.find(c => c.name === 'open-requests')
   const embed = await getEmbed(request)
 
-  const m = await msg.guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+  const m = await channel.messages.fetch(request.message)
   await m.edit({ embed })
 }
 
-function catchErr (msg, err) {
+function catchErr (guild, err) {
   console.log(err)
-  msg.channel.send('Something went wrong.')
+  const channel = guild.channels.cache.find(c => c.name === 'request-talk')
+  channel.send('Error returned during request <@194614248511504385>')
 }

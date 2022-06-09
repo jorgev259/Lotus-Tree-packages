@@ -1,7 +1,7 @@
-const Sequelize = require('sequelize')
-const { DataTypes } = Sequelize
+import Sequelize, { DataTypes } from 'sequelize'
 
-module.exports = {
+export * from './commands'
+export default {
   name: 'requestcat',
   commands: require('./commands'),
   events: {

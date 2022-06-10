@@ -192,7 +192,7 @@ function _holdRequest() {
                     switch (_context11.prev = _context11.next) {
                       case 0:
                         talkChannel = guild.channels.cache.find(function (c) {
-                          return c.name === 'requests-talk';
+                          return c.name === 'request-talk';
                         });
                         request.state = 'hold';
                         request.reason = reason;
@@ -297,7 +297,7 @@ function _rejectRequest() {
                   switch (_context14.prev = _context14.next) {
                     case 0:
                       talkChannel = guild.channels.cache.find(function (c) {
-                        return c.name === 'requests-talk';
+                        return c.name === 'request-talk';
                       });
                       _context14.next = 3;
                       return talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason));
@@ -506,7 +506,7 @@ var _default = {
                   return r.name === 'Owner';
                 });
                 talkChannel = msg.guild.channels.cache.find(function (c) {
-                  return c.name === 'requests-talk';
+                  return c.name === 'request-talk';
                 });
 
                 if (donator || owner) {

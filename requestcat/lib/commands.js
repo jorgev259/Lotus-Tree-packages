@@ -2,6 +2,14 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.completeRequest = completeRequest;
+exports["default"] = void 0;
+exports.holdRequest = holdRequest;
+exports.rejectRequest = rejectRequest;
+
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
@@ -14,34 +22,73 @@ var _axios = require("axios");
 
 var _getUrls = _interopRequireDefault(require("get-urls"));
 
-// const moment = require('moment')
-function setLockChannel(_x, _x2) {
-  return _setLockChannel.apply(this, arguments);
+var _discord = require("discord.js");
+
+function checkLockChannel(_x, _x2) {
+  return _checkLockChannel.apply(this, arguments);
 }
 
-function _setLockChannel() {
-  _setLockChannel = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee15(msg, value) {
-    return _regenerator["default"].wrap(function _callee15$(_context15) {
+function _checkLockChannel() {
+  _checkLockChannel = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(socdb, guild) {
+    var countPending, channel, membersRole, permissions;
+    return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context15.prev = _context15.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            _context15.next = 2;
-            return msg.guild.channels.cache.find(function (c) {
-              return c.name === 'request-submission';
-            }).permissionOverwrites.edit(msg.guild.roles.cache.find(function (r) {
-              return r.name === 'Members';
-            }), {
-              SEND_MESSAGES: value
-            });
+            _context8.next = 2;
+            return getPendingCount(socdb);
 
           case 2:
+            countPending = _context8.sent;
+            channel = guild.channels.cache.find(function (c) {
+              return c.name === 'request-submission';
+            });
+            membersRole = guild.roles.cache.find(function (r) {
+              return r.name === 'Members';
+            });
+            permissions = channel.permissionsFor(membersRole);
+
+            if (!(countPending >= 20 && permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
+              _context8.next = 13;
+              break;
+            }
+
+            _context8.next = 9;
+            return channel.permissionOverwrites.edit(membersRole, {
+              SEND_MESSAGES: false
+            });
+
+          case 9:
+            _context8.next = 11;
+            return channel.send('Requests closed');
+
+          case 11:
+            _context8.next = 18;
+            break;
+
+          case 13:
+            if (!(countPending < 20 && !permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
+              _context8.next = 18;
+              break;
+            }
+
+            _context8.next = 16;
+            return channel.permissionOverwrites.edit(membersRole, {
+              SEND_MESSAGES: true
+            });
+
+          case 16:
+            _context8.next = 18;
+            return channel.send('Requests open');
+
+          case 18:
           case "end":
-            return _context15.stop();
+            return _context8.stop();
         }
       }
-    }, _callee15);
+    }, _callee8);
   }));
-  return _setLockChannel.apply(this, arguments);
+  return _checkLockChannel.apply(this, arguments);
 }
 
 var getPendingCount = function getPendingCount(socdb) {
@@ -53,7 +100,233 @@ var getPendingCount = function getPendingCount(socdb) {
   });
 };
 
-module.exports = {
+function completeRequest(_x3, _x4, _x5, _x6) {
+  return _completeRequest.apply(this, arguments);
+}
+
+function _completeRequest() {
+  _completeRequest = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(client, socdb, guildId, request) {
+    var guild;
+    return _regenerator["default"].wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            _context10.next = 2;
+            return client.guilds.fetch(guildId);
+
+          case 2:
+            guild = _context10.sent;
+            _context10.next = 5;
+            return socdb.transaction( /*#__PURE__*/function () {
+              var _ref14 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(transaction) {
+                var reqMsg;
+                return _regenerator["default"].wrap(function _callee9$(_context9) {
+                  while (1) {
+                    switch (_context9.prev = _context9.next) {
+                      case 0:
+                        _context9.next = 2;
+                        return guild.channels.cache.find(function (c) {
+                          return c.name === 'open-requests';
+                        }).messages.fetch(request.message);
+
+                      case 2:
+                        reqMsg = _context9.sent;
+                        _context9.next = 5;
+                        return reqMsg["delete"]();
+
+                      case 5:
+                        request.state = 'complete';
+                        request.message = null;
+                        _context9.next = 9;
+                        return request.save();
+
+                      case 9:
+                      case "end":
+                        return _context9.stop();
+                    }
+                  }
+                }, _callee9);
+              }));
+
+              return function (_x25) {
+                return _ref14.apply(this, arguments);
+              };
+            }()).then(function () {
+              return checkLockChannel(socdb, guild);
+            })["catch"](function (err) {
+              return catchErr(guild, err);
+            });
+
+          case 5:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10);
+  }));
+  return _completeRequest.apply(this, arguments);
+}
+
+function holdRequest(_x7, _x8, _x9, _x10, _x11) {
+  return _holdRequest.apply(this, arguments);
+}
+
+function _holdRequest() {
+  _holdRequest = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12(client, socdb, guildId, request, reason) {
+    var guild;
+    return _regenerator["default"].wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            _context12.next = 2;
+            return client.guilds.fetch(guildId);
+
+          case 2:
+            guild = _context12.sent;
+            _context12.next = 5;
+            return socdb.transaction( /*#__PURE__*/function () {
+              var _ref15 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(transaction) {
+                var talkChannel;
+                return _regenerator["default"].wrap(function _callee11$(_context11) {
+                  while (1) {
+                    switch (_context11.prev = _context11.next) {
+                      case 0:
+                        talkChannel = guild.channels.cache.find(function (c) {
+                          return c.name === 'requests-talk';
+                        });
+                        request.state = 'hold';
+                        request.reason = reason;
+                        _context11.next = 5;
+                        return request.save();
+
+                      case 5:
+                        _context11.next = 7;
+                        return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" has been put ON HOLD.\nReason: ").concat(request.reason, " <@").concat(request.userID, ">"));
+
+                      case 7:
+                        if (!request.message) {
+                          _context11.next = 10;
+                          break;
+                        }
+
+                        _context11.next = 10;
+                        return editEmbed(guild, request);
+
+                      case 10:
+                      case "end":
+                        return _context11.stop();
+                    }
+                  }
+                }, _callee11);
+              }));
+
+              return function (_x26) {
+                return _ref15.apply(this, arguments);
+              };
+            }()).then(function () {
+              return checkLockChannel(socdb, guild);
+            })["catch"](function (err) {
+              return catchErr(guild, err);
+            });
+
+          case 5:
+          case "end":
+            return _context12.stop();
+        }
+      }
+    }, _callee12);
+  }));
+  return _holdRequest.apply(this, arguments);
+}
+
+function rejectRequest(_x12, _x13, _x14, _x15, _x16) {
+  return _rejectRequest.apply(this, arguments);
+}
+
+function _rejectRequest() {
+  _rejectRequest = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee15(client, socdb, guildId, request, reason) {
+    var guild;
+    return _regenerator["default"].wrap(function _callee15$(_context15) {
+      while (1) {
+        switch (_context15.prev = _context15.next) {
+          case 0:
+            _context15.next = 2;
+            return client.guilds.fetch(guildId);
+
+          case 2:
+            guild = _context15.sent;
+            _context15.next = 5;
+            return socdb.transaction( /*#__PURE__*/function () {
+              var _ref16 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee13(transaction) {
+                var reqMsg;
+                return _regenerator["default"].wrap(function _callee13$(_context13) {
+                  while (1) {
+                    switch (_context13.prev = _context13.next) {
+                      case 0:
+                        _context13.next = 2;
+                        return guild.channels.cache.find(function (c) {
+                          return c.name === 'open-requests';
+                        }).messages.fetch(request.message);
+
+                      case 2:
+                        reqMsg = _context13.sent;
+                        _context13.next = 5;
+                        return reqMsg["delete"]();
+
+                      case 5:
+                        request.state = 'complete';
+                        request.reason = reason;
+                        _context13.next = 9;
+                        return request.save();
+
+                      case 9:
+                      case "end":
+                        return _context13.stop();
+                    }
+                  }
+                }, _callee13);
+              }));
+
+              return function (_x27) {
+                return _ref16.apply(this, arguments);
+              };
+            }()).then( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee14() {
+              var talkChannel;
+              return _regenerator["default"].wrap(function _callee14$(_context14) {
+                while (1) {
+                  switch (_context14.prev = _context14.next) {
+                    case 0:
+                      talkChannel = guild.channels.cache.find(function (c) {
+                        return c.name === 'requests-talk';
+                      });
+                      _context14.next = 3;
+                      return talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason));
+
+                    case 3:
+                      _context14.next = 5;
+                      return checkLockChannel(socdb, guild);
+
+                    case 5:
+                    case "end":
+                      return _context14.stop();
+                  }
+                }
+              }, _callee14);
+            })))["catch"](function (err) {
+              return catchErr(guild, err);
+            });
+
+          case 5:
+          case "end":
+            return _context15.stop();
+        }
+      }
+    }, _callee15);
+  }));
+  return _rejectRequest.apply(this, arguments);
+}
+
+var _default = {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
@@ -153,166 +426,77 @@ module.exports = {
     desc: 'Marks a request as ON HOLD.',
     usage: 'hold [id] [reason]',
     execute: function execute(_ref5, _ref6) {
-      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5() {
-        var param, socdb, msg, request;
-        return _regenerator["default"].wrap(function _callee5$(_context5) {
+      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
+        var client, param, socdb, configFile, msg, request, reason;
+        return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                param = _ref5.param, socdb = _ref5.socdb;
+                client = _ref5.client, param = _ref5.param, socdb = _ref5.socdb, configFile = _ref5.configFile;
                 msg = _ref6.message;
 
                 if (param[2]) {
-                  _context5.next = 4;
+                  _context3.next = 4;
                   break;
                 }
 
-                return _context5.abrupt("return", msg.reply('Incomplete command.'));
+                return _context3.abrupt("return", msg.reply('Incomplete command.'));
 
               case 4:
-                _context5.next = 6;
+                _context3.next = 6;
                 return socdb.models.request.findByPk(param[1]);
 
               case 6:
-                request = _context5.sent;
+                request = _context3.sent;
 
                 if (request) {
-                  _context5.next = 9;
+                  _context3.next = 9;
                   break;
                 }
 
-                return _context5.abrupt("return", msg.reply('Request not found'));
+                return _context3.abrupt("return", msg.reply('Request not found'));
 
               case 9:
                 if (!(request.state === 'hold')) {
-                  _context5.next = 11;
+                  _context3.next = 11;
                   break;
                 }
 
-                return _context5.abrupt("return", msg.reply('Request already on hold'));
+                return _context3.abrupt("return", msg.reply('Request already on hold'));
 
               case 11:
-                socdb.transaction( /*#__PURE__*/function () {
-                  var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(transaction) {
-                    var talkChannel;
-                    return _regenerator["default"].wrap(function _callee3$(_context3) {
-                      while (1) {
-                        switch (_context3.prev = _context3.next) {
-                          case 0:
-                            talkChannel = msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'requests-talk';
-                            });
-                            request.reason = param.slice(2).join(' ');
-                            _context3.next = 4;
-                            return request.save();
+                reason = param.slice(2).join(' ');
+                _context3.next = 14;
+                return holdRequest(client, socdb, configFile.requestcat.guild, request, reason);
 
-                          case 4:
-                            _context3.next = 6;
-                            return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" has been put ON HOLD.\nReason: ").concat(request.reason, " <@").concat(request.userID, ">"));
-
-                          case 6:
-                            if (!request.message) {
-                              _context3.next = 9;
-                              break;
-                            }
-
-                            _context3.next = 9;
-                            return editEmbed(msg, request);
-
-                          case 9:
-                          case "end":
-                            return _context3.stop();
-                        }
-                      }
-                    }, _callee3);
-                  }));
-
-                  return function (_x3) {
-                    return _ref7.apply(this, arguments);
-                  };
-                }()).then( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4() {
-                  var member, donator, countPending;
-                  return _regenerator["default"].wrap(function _callee4$(_context4) {
-                    while (1) {
-                      switch (_context4.prev = _context4.next) {
-                        case 0:
-                          _context4.prev = 0;
-                          _context4.next = 3;
-                          return msg.guild.members.fetch(request.userID);
-
-                        case 3:
-                          member = _context4.sent;
-                          donator = member.roles.cache.some(function (r) {
-                            return r.name === 'Donators';
-                          });
-
-                          if (!donator) {
-                            _context4.next = 7;
-                            break;
-                          }
-
-                          return _context4.abrupt("return");
-
-                        case 7:
-                          _context4.next = 9;
-                          return getPendingCount(socdb);
-
-                        case 9:
-                          countPending = _context4.sent;
-
-                          if (countPending < 20) {
-                            msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'request-submission';
-                            }).send('Requests open');
-                            setLockChannel(msg, true);
-                          }
-
-                          _context4.next = 16;
-                          break;
-
-                        case 13:
-                          _context4.prev = 13;
-                          _context4.t0 = _context4["catch"](0);
-                          catchErr(msg, _context4.t0);
-
-                        case 16:
-                        case "end":
-                          return _context4.stop();
-                      }
-                    }
-                  }, _callee4, null, [[0, 13]]);
-                })))["catch"](function (err) {
-                  catchErr(msg, err);
-                });
-
-              case 12:
+              case 14:
               case "end":
-                return _context5.stop();
+                return _context3.stop();
             }
           }
-        }, _callee5);
+        }, _callee3);
       }))();
     }
   },
   request: {
     desc: 'Request a soundtrack',
     usage: 'request [url or name]',
-    execute: function execute(_ref9, _ref10) {
-      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
+    execute: function execute(_ref7, _ref8) {
+      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5() {
         var param, socdb, msg, donator, owner, talkChannel, pending, countPending, title, urls, link, checkUrl, info, request;
-        return _regenerator["default"].wrap(function _callee8$(_context8) {
+        return _regenerator["default"].wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                param = _ref9.param, socdb = _ref9.socdb;
-                msg = _ref10.message;
+                param = _ref7.param, socdb = _ref7.socdb;
+                msg = _ref8.message;
 
                 if (param[1]) {
-                  _context8.next = 4;
+                  _context5.next = 4;
                   break;
                 }
 
-                return _context8.abrupt("return", msg.channel.send('Please provide a url or name'));
+                return _context5.abrupt("return", msg.channel.send('Please provide a url or name'));
 
               case 4:
                 donator = msg.member.roles.cache.some(function (r) {
@@ -326,11 +510,11 @@ module.exports = {
                 });
 
                 if (donator || owner) {
-                  _context8.next = 20;
+                  _context5.next = 22;
                   break;
                 }
 
-                _context8.next = 10;
+                _context5.next = 10;
                 return socdb.models.request.findOne({
                   where: {
                     userID: msg.author.id,
@@ -339,34 +523,38 @@ module.exports = {
                 });
 
               case 10:
-                pending = _context8.sent;
+                pending = _context5.sent;
 
                 if (!pending) {
-                  _context8.next = 13;
+                  _context5.next = 13;
                   break;
                 }
 
-                return _context8.abrupt("return", talkChannel.send("The request '".concat(pending.title, " ").concat(pending.url ? "(".concat(pending.url, ")") : '', "' is still on place. Wait until its fulfilled or rejected ").concat(msg.author)));
+                return _context5.abrupt("return", talkChannel.send("The request '".concat(pending.title, " ").concat(pending.url ? "(".concat(pending.url, ")") : '', "' is still on place. Wait until its fulfilled or rejected ").concat(msg.author)));
 
               case 13:
-                _context8.next = 15;
+                _context5.next = 15;
                 return getPendingCount(socdb);
 
               case 15:
-                countPending = _context8.sent;
+                countPending = _context5.sent;
 
                 if (!(countPending >= 20)) {
-                  _context8.next = 20;
+                  _context5.next = 22;
                   break;
                 }
 
-                _context8.next = 19;
-                return setLockChannel(msg, false);
+                _context5.next = 19;
+                return msg.channel.send('There are too many open requests right now. Wait until slots are opened.');
 
               case 19:
-                return _context8.abrupt("return", msg.channel.send('There are too many open requests right now. Wait until slots are opened.'));
+                _context5.next = 21;
+                return checkLockChannel(socdb, msg.guild);
 
-              case 20:
+              case 21:
+                return _context5.abrupt("return");
+
+              case 22:
                 title = param.slice(1).join(' ');
                 urls = Array.from((0, _getUrls["default"])(title, {
                   normalizeProtocol: false,
@@ -376,53 +564,53 @@ module.exports = {
                 }));
 
                 if (!(urls.length > 1)) {
-                  _context8.next = 24;
+                  _context5.next = 26;
                   break;
                 }
 
-                return _context8.abrupt("return", msg.channel.send('You can only specify one url per request.'));
+                return _context5.abrupt("return", msg.channel.send('You can only specify one url per request.'));
 
-              case 24:
+              case 26:
                 link = urls[0];
 
                 if (!(urls.length > 0)) {
-                  _context8.next = 37;
+                  _context5.next = 39;
                   break;
                 }
 
-                _context8.next = 28;
+                _context5.next = 30;
                 return socdb.models.request.findOne({
                   where: {
                     link: link
                   }
                 });
 
-              case 28:
-                checkUrl = _context8.sent;
+              case 30:
+                checkUrl = _context5.sent;
 
                 if (!checkUrl) {
-                  _context8.next = 31;
+                  _context5.next = 33;
                   break;
                 }
 
-                return _context8.abrupt("return", talkChannel.send("This soundtrack has already been requested: ".concat(link)));
+                return _context5.abrupt("return", talkChannel.send("This soundtrack has already been requested: ".concat(link)));
 
-              case 31:
+              case 33:
                 title = title.replace(link, '');
 
                 if (!link.includes('vgmdb.net')) {
-                  _context8.next = 37;
+                  _context5.next = 39;
                   break;
                 }
 
-                _context8.next = 35;
+                _context5.next = 37;
                 return getVGMDB(link);
 
-              case 35:
-                info = _context8.sent;
+              case 37:
+                info = _context5.sent;
                 if (info) title = info.name;
 
-              case 37:
+              case 39:
                 request = {
                   title: title.trim(),
                   link: link,
@@ -432,362 +620,159 @@ module.exports = {
                   state: 'pending'
                 };
                 socdb.transaction( /*#__PURE__*/function () {
-                  var _ref11 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(transaction) {
+                  var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(transaction) {
                     var row;
-                    return _regenerator["default"].wrap(function _callee6$(_context6) {
+                    return _regenerator["default"].wrap(function _callee4$(_context4) {
                       while (1) {
-                        switch (_context6.prev = _context6.next) {
+                        switch (_context4.prev = _context4.next) {
                           case 0:
-                            _context6.next = 2;
+                            _context4.next = 2;
                             return socdb.models.request.create(request, {
                               transaction: transaction
                             });
 
                           case 2:
-                            row = _context6.sent;
-                            _context6.next = 5;
+                            row = _context4.sent;
+                            _context4.next = 5;
                             return sendEmbed(msg, row);
 
                           case 5:
-                            msg.reply('Request submitted');
+                            _context4.next = 7;
+                            return msg.reply('Request submitted');
 
-                          case 6:
+                          case 7:
                           case "end":
-                            return _context6.stop();
+                            return _context4.stop();
                         }
                       }
-                    }, _callee6);
+                    }, _callee4);
                   }));
 
-                  return function (_x4) {
-                    return _ref11.apply(this, arguments);
+                  return function (_x17) {
+                    return _ref9.apply(this, arguments);
                   };
-                }()).then( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
-                  var countPending;
-                  return _regenerator["default"].wrap(function _callee7$(_context7) {
-                    while (1) {
-                      switch (_context7.prev = _context7.next) {
-                        case 0:
-                          if (!donator) {
-                            _context7.next = 2;
-                            break;
-                          }
-
-                          return _context7.abrupt("return");
-
-                        case 2:
-                          _context7.next = 4;
-                          return getPendingCount(socdb);
-
-                        case 4:
-                          countPending = _context7.sent;
-
-                          if (countPending >= 20) {
-                            msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'request-submission';
-                            }).send('Requests closed');
-                            setLockChannel(msg, false);
-                          }
-
-                        case 6:
-                        case "end":
-                          return _context7.stop();
-                      }
-                    }
-                  }, _callee7);
-                })))["catch"](function (err) {
-                  catchErr(msg, err);
+                }()).then(function () {
+                  return checkLockChannel(socdb, msg.guild);
+                })["catch"](function (err) {
+                  return catchErr(msg.guild, err);
                 });
 
-              case 39:
+              case 41:
               case "end":
-                return _context8.stop();
+                return _context5.stop();
             }
           }
-        }, _callee8);
+        }, _callee5);
       }))();
     }
   },
   complete: {
     desc: 'Marks a request as completed.',
     usage: 'complete [id]',
-    execute: function execute(_ref13, _ref14) {
-      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11() {
-        var param, socdb, msg, request;
-        return _regenerator["default"].wrap(function _callee11$(_context11) {
+    execute: function execute(_ref10, _ref11) {
+      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6() {
+        var client, param, socdb, configFile, msg, request;
+        return _regenerator["default"].wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                param = _ref13.param, socdb = _ref13.socdb;
-                msg = _ref14.message;
+                client = _ref10.client, param = _ref10.param, socdb = _ref10.socdb, configFile = _ref10.configFile;
+                msg = _ref11.message;
 
                 if (param[1]) {
-                  _context11.next = 4;
+                  _context6.next = 4;
                   break;
                 }
 
-                return _context11.abrupt("return", msg.reply('Incomplete command.'));
+                return _context6.abrupt("return", msg.reply('Incomplete command.'));
 
               case 4:
-                _context11.next = 6;
+                _context6.next = 6;
                 return socdb.models.request.findByPk(param[1]);
 
               case 6:
-                request = _context11.sent;
+                request = _context6.sent;
 
                 if (request) {
-                  _context11.next = 9;
+                  _context6.next = 9;
                   break;
                 }
 
-                return _context11.abrupt("return", msg.reply('Request not found'));
+                return _context6.abrupt("return", msg.reply('Request not found'));
 
               case 9:
                 if (!(request.state === 'complete')) {
-                  _context11.next = 11;
+                  _context6.next = 11;
                   break;
                 }
 
-                return _context11.abrupt("return", msg.reply('Request already complete'));
+                return _context6.abrupt("return", msg.reply('Request already complete'));
 
               case 11:
-                socdb.transaction( /*#__PURE__*/function () {
-                  var _ref15 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(transaction) {
-                    var reqMsg;
-                    return _regenerator["default"].wrap(function _callee9$(_context9) {
-                      while (1) {
-                        switch (_context9.prev = _context9.next) {
-                          case 0:
-                            _context9.next = 2;
-                            return msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'open-requests';
-                            }).messages.fetch(request.message);
+                _context6.next = 13;
+                return completeRequest(client, socdb, configFile.requestcat.guild, request);
 
-                          case 2:
-                            reqMsg = _context9.sent;
-                            _context9.next = 5;
-                            return reqMsg["delete"]();
-
-                          case 5:
-                            request.state = 'complete';
-                            _context9.next = 8;
-                            return request.save();
-
-                          case 8:
-                          case "end":
-                            return _context9.stop();
-                        }
-                      }
-                    }, _callee9);
-                  }));
-
-                  return function (_x5) {
-                    return _ref15.apply(this, arguments);
-                  };
-                }()).then( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10() {
-                  var member, donator, countPending;
-                  return _regenerator["default"].wrap(function _callee10$(_context10) {
-                    while (1) {
-                      switch (_context10.prev = _context10.next) {
-                        case 0:
-                          _context10.prev = 0;
-                          _context10.next = 3;
-                          return msg.guild.members.fetch(request.userID);
-
-                        case 3:
-                          member = _context10.sent;
-                          donator = member.roles.cache.some(function (r) {
-                            return r.name === 'Donators';
-                          });
-
-                          if (!donator) {
-                            _context10.next = 7;
-                            break;
-                          }
-
-                          return _context10.abrupt("return");
-
-                        case 7:
-                          _context10.next = 9;
-                          return getPendingCount(socdb);
-
-                        case 9:
-                          countPending = _context10.sent;
-
-                          if (countPending < 20) {
-                            msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'request-submission';
-                            }).send('Requests open');
-                            setLockChannel(msg, true);
-                          }
-
-                          _context10.next = 16;
-                          break;
-
-                        case 13:
-                          _context10.prev = 13;
-                          _context10.t0 = _context10["catch"](0);
-                          catchErr(msg, _context10.t0);
-
-                        case 16:
-                        case "end":
-                          return _context10.stop();
-                      }
-                    }
-                  }, _callee10, null, [[0, 13]]);
-                })))["catch"](function (err) {
-                  catchErr(msg, err);
-                });
-
-              case 12:
+              case 13:
               case "end":
-                return _context11.stop();
+                return _context6.stop();
             }
           }
-        }, _callee11);
+        }, _callee6);
       }))();
     }
   },
   reject: {
     desc: 'Marks a request as rejected',
     usage: 'reject [id] [reason]',
-    execute: function execute(_ref17, _ref18) {
-      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee14() {
-        var param, socdb, msg, request, reason;
-        return _regenerator["default"].wrap(function _callee14$(_context14) {
+    execute: function execute(_ref12, _ref13) {
+      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
+        var client, param, socdb, configFile, msg, request, reason;
+        return _regenerator["default"].wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context14.prev = _context14.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
-                param = _ref17.param, socdb = _ref17.socdb;
-                msg = _ref18.message;
+                client = _ref12.client, param = _ref12.param, socdb = _ref12.socdb, configFile = _ref12.configFile;
+                msg = _ref13.message;
 
                 if (param[2]) {
-                  _context14.next = 4;
+                  _context7.next = 4;
                   break;
                 }
 
-                return _context14.abrupt("return", msg.reply('Incomplete command.'));
+                return _context7.abrupt("return", msg.reply('Incomplete command.'));
 
               case 4:
-                _context14.next = 6;
+                _context7.next = 6;
                 return socdb.models.request.findByPk(param[1]);
 
               case 6:
-                request = _context14.sent;
+                request = _context7.sent;
 
                 if (request) {
-                  _context14.next = 9;
+                  _context7.next = 9;
                   break;
                 }
 
-                return _context14.abrupt("return", msg.reply('Request not found'));
+                return _context7.abrupt("return", msg.reply('Request not found'));
 
               case 9:
                 reason = param.slice(2).join(' ');
-                socdb.transaction( /*#__PURE__*/function () {
-                  var _ref19 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12(transaction) {
-                    var reqMsg;
-                    return _regenerator["default"].wrap(function _callee12$(_context12) {
-                      while (1) {
-                        switch (_context12.prev = _context12.next) {
-                          case 0:
-                            _context12.next = 2;
-                            return msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'open-requests';
-                            }).messages.fetch(request.message);
+                _context7.next = 12;
+                return rejectRequest(client, socdb, configFile.requestcat.guild, request, reason);
 
-                          case 2:
-                            reqMsg = _context12.sent;
-                            _context12.next = 5;
-                            return reqMsg["delete"]();
-
-                          case 5:
-                            request.state = 'complete';
-                            _context12.next = 8;
-                            return request.save();
-
-                          case 8:
-                          case "end":
-                            return _context12.stop();
-                        }
-                      }
-                    }, _callee12);
-                  }));
-
-                  return function (_x6) {
-                    return _ref19.apply(this, arguments);
-                  };
-                }()).then( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee13() {
-                  var talkChannel, member, donator, countPending;
-                  return _regenerator["default"].wrap(function _callee13$(_context13) {
-                    while (1) {
-                      switch (_context13.prev = _context13.next) {
-                        case 0:
-                          talkChannel = msg.guild.channels.cache.find(function (c) {
-                            return c.name === 'requests-talk';
-                          });
-                          talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason));
-                          _context13.prev = 2;
-                          _context13.next = 5;
-                          return msg.guild.members.fetch(request.userID);
-
-                        case 5:
-                          member = _context13.sent;
-                          donator = member.roles.cache.some(function (r) {
-                            return r.name === 'Donators';
-                          });
-
-                          if (!donator) {
-                            _context13.next = 9;
-                            break;
-                          }
-
-                          return _context13.abrupt("return");
-
-                        case 9:
-                          _context13.next = 11;
-                          return getPendingCount(socdb);
-
-                        case 11:
-                          countPending = _context13.sent;
-
-                          if (countPending < 20) {
-                            msg.guild.channels.cache.find(function (c) {
-                              return c.name === 'request-submission';
-                            }).send('Requests open');
-                            setLockChannel(msg, true);
-                          }
-
-                          _context13.next = 18;
-                          break;
-
-                        case 15:
-                          _context13.prev = 15;
-                          _context13.t0 = _context13["catch"](2);
-                          catchErr(msg, _context13.t0);
-
-                        case 18:
-                        case "end":
-                          return _context13.stop();
-                      }
-                    }
-                  }, _callee13, null, [[2, 15]]);
-                })))["catch"](function (err) {
-                  catchErr(msg, err);
-                });
-
-              case 11:
+              case 12:
               case "end":
-                return _context14.stop();
+                return _context7.stop();
             }
           }
-        }, _callee14);
+        }, _callee7);
       }))();
     }
   }
 };
+exports["default"] = _default;
 
-function getVGMDB(_x7) {
+function getVGMDB(_x18) {
   return _getVGMDB.apply(this, arguments);
 }
 
@@ -835,7 +820,7 @@ var isValidUrl = function isValidUrl(s) {
   }
 };
 
-function getCover(_x8) {
+function getCover(_x19) {
   return _getCover.apply(this, arguments);
 }
 
@@ -881,7 +866,7 @@ function _getCover() {
   return _getCover.apply(this, arguments);
 }
 
-function getEmbed(_x9) {
+function getEmbed(_x20) {
   return _getEmbed.apply(this, arguments);
 }
 
@@ -935,7 +920,7 @@ function _getEmbed() {
   return _getEmbed.apply(this, arguments);
 }
 
-function sendEmbed(_x10, _x11) {
+function sendEmbed(_x21, _x22) {
   return _sendEmbed.apply(this, arguments);
 }
 
@@ -974,35 +959,36 @@ function _sendEmbed() {
   return _sendEmbed.apply(this, arguments);
 }
 
-function editEmbed(_x12, _x13) {
+function editEmbed(_x23, _x24) {
   return _editEmbed.apply(this, arguments);
 }
 
 function _editEmbed() {
-  _editEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee20(msg, request) {
-    var embed, m;
+  _editEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee20(guild, request) {
+    var channel, embed, m;
     return _regenerator["default"].wrap(function _callee20$(_context20) {
       while (1) {
         switch (_context20.prev = _context20.next) {
           case 0:
-            _context20.next = 2;
+            channel = guild.channels.cache.find(function (c) {
+              return c.name === 'open-requests';
+            });
+            _context20.next = 3;
             return getEmbed(request);
 
-          case 2:
+          case 3:
             embed = _context20.sent;
-            _context20.next = 5;
-            return msg.guild.channels.cache.find(function (c) {
-              return c.name === 'open-requests';
-            }).messages.fetch(request.message);
+            _context20.next = 6;
+            return channel.messages.fetch(request.message);
 
-          case 5:
+          case 6:
             m = _context20.sent;
-            _context20.next = 8;
+            _context20.next = 9;
             return m.edit({
               embed: embed
             });
 
-          case 8:
+          case 9:
           case "end":
             return _context20.stop();
         }
@@ -1012,7 +998,10 @@ function _editEmbed() {
   return _editEmbed.apply(this, arguments);
 }
 
-function catchErr(msg, err) {
+function catchErr(guild, err) {
   console.log(err);
-  msg.channel.send('Something went wrong.');
+  var channel = guild.channels.cache.find(function (c) {
+    return c.name === 'request-talk';
+  });
+  channel.send('Error returned during request <@194614248511504385>');
 }

@@ -2,14 +2,39 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+var _typeof = require("@babel/runtime/helpers/typeof");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _exportNames = {};
+exports["default"] = void 0;
+
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var Sequelize = require('sequelize');
+var _sequelize = _interopRequireWildcard(require("sequelize"));
 
-var DataTypes = Sequelize.DataTypes;
-module.exports = {
+var _commands = require("./commands");
+
+Object.keys(_commands).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _commands[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _commands[key];
+    }
+  });
+});
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+var _default = {
   name: 'requestcat',
   commands: require('./commands'),
   events: {
@@ -23,28 +48,28 @@ module.exports = {
                 configFile = globals.configFile, client = globals.client;
                 config = configFile.sequelize;
                 config.database = 'soc';
-                globals.socdb = new Sequelize(config);
+                globals.socdb = new _sequelize["default"](config);
                 globals.socdb.define('request', {
                   id: {
-                    type: DataTypes.INTEGER,
+                    type: _sequelize.DataTypes.INTEGER,
                     primaryKey: true,
                     autoIncrement: true
                   },
-                  title: DataTypes.STRING,
-                  link: DataTypes.STRING,
-                  user: DataTypes.STRING,
-                  userID: DataTypes.STRING,
+                  title: _sequelize.DataTypes.STRING,
+                  link: _sequelize.DataTypes.STRING,
+                  user: _sequelize.DataTypes.STRING,
+                  userID: _sequelize.DataTypes.STRING,
                   state: {
-                    type: DataTypes.STRING,
+                    type: _sequelize.DataTypes.STRING,
                     allowNull: false
                   },
                   donator: {
-                    type: DataTypes.BOOLEAN,
+                    type: _sequelize.DataTypes.BOOLEAN,
                     allowNull: false
                   },
-                  reason: DataTypes.STRING,
-                  comments: DataTypes.STRING,
-                  message: DataTypes.STRING
+                  reason: _sequelize.DataTypes.STRING,
+                  comments: _sequelize.DataTypes.STRING,
+                  message: _sequelize.DataTypes.STRING
                 });
                 _context.prev = 5;
                 _context.next = 8;
@@ -73,3 +98,4 @@ module.exports = {
     }
   }
 };
+exports["default"] = _default;

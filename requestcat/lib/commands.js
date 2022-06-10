@@ -201,7 +201,7 @@ function _holdRequest() {
 
                       case 5:
                         _context11.next = 7;
-                        return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" has been put ON HOLD.\nReason: ").concat(request.reason, " <@").concat(request.userID, ">"));
+                        return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" has been put ON HOLD.\nReason: ").concat(request.reason || 'I made it the fuck up', " <@").concat(request.userID, ">"));
 
                       case 7:
                         if (!request.message) {
@@ -300,7 +300,7 @@ function _rejectRequest() {
                         return c.name === 'request-talk';
                       });
                       _context14.next = 3;
-                      return talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason));
+                      return talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason || 'I made it the fuck up'));
 
                     case 3:
                       _context14.next = 5;

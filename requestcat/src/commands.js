@@ -42,7 +42,7 @@ export async function holdRequest (client, socdb, guildId, request, reason) {
   const guild = await client.guilds.fetch(guildId)
 
   await socdb.transaction(async transaction => {
-    const talkChannel = guild.channels.cache.find(c => c.name === 'requests-talk')
+    const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
 
     request.state = 'hold'
     request.reason = reason
@@ -67,7 +67,7 @@ export async function rejectRequest (client, socdb, guildId, request, reason) {
     await request.save()
   })
     .then(async () => {
-      const talkChannel = guild.channels.cache.find(c => c.name === 'requests-talk')
+      const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
       await talkChannel.send(`The request ${request.title || request.link} from <@${request.userID}> has been rejected.\nReason: ${reason}`)
 
       await checkLockChannel(socdb, guild)
@@ -132,7 +132,7 @@ export default {
       const donator = msg.member.roles.cache.some(r => r.name === 'Donators')
       const owner = msg.member.roles.cache.some(r => r.name === 'Owner')
 
-      const talkChannel = msg.guild.channels.cache.find(c => c.name === 'requests-talk')
+      const talkChannel = msg.guild.channels.cache.find(c => c.name === 'request-talk')
       if (!(donator || owner)) {
         const pending = await socdb.models.request.findOne({ where: { userID: msg.author.id, state: 'pending' } })
         if (pending) return talkChannel.send(`The request '${pending.title} ${pending.url ? `(${pending.url})` : ''}' is still on place. Wait until its fulfilled or rejected ${msg.author}`)

@@ -47,7 +47,7 @@ export async function holdRequest (client, socdb, guildId, request, reason) {
     request.state = 'hold'
     request.reason = reason
     await request.save()
-    await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" has been put ON HOLD.\nReason: ${request.reason || 'I made it the fuck up'} <@${request.userID}>`)
+    await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been put ON HOLD.\nReason: ${request.reason || 'I made it the fuck up'}`)
 
     if (request.message) await editEmbed(guild, request)
   })
@@ -61,14 +61,11 @@ export async function rejectRequest (client, socdb, guildId, request, reason) {
   await socdb.transaction(async transaction => {
     const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
     await reqMsg.delete()
-
-    request.state = 'complete'
-    request.reason = reason
-    await request.save()
+    await request.delete()
   })
     .then(async () => {
       const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
-      await talkChannel.send(`The request ${request.title || request.link} from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
+      await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
 
       await checkLockChannel(socdb, guild)
     })

@@ -201,7 +201,7 @@ function _holdRequest() {
 
                       case 5:
                         _context11.next = 7;
-                        return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" has been put ON HOLD.\nReason: ").concat(request.reason || 'I made it the fuck up', " <@").concat(request.userID, ">"));
+                        return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" from <@").concat(request.userID, "> has been put ON HOLD.\nReason: ").concat(request.reason || 'I made it the fuck up'));
 
                       case 7:
                         if (!request.message) {
@@ -274,12 +274,10 @@ function _rejectRequest() {
                         return reqMsg["delete"]();
 
                       case 5:
-                        request.state = 'complete';
-                        request.reason = reason;
-                        _context13.next = 9;
-                        return request.save();
+                        _context13.next = 7;
+                        return request["delete"]();
 
-                      case 9:
+                      case 7:
                       case "end":
                         return _context13.stop();
                     }
@@ -300,7 +298,7 @@ function _rejectRequest() {
                         return c.name === 'request-talk';
                       });
                       _context14.next = 3;
-                      return talkChannel.send("The request ".concat(request.title || request.link, " from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason || 'I made it the fuck up'));
+                      return talkChannel.send("\"".concat(request.title).concat(request.link ? " (".concat(request.link, ")") : '', "\" from <@").concat(request.userID, "> has been rejected.\nReason: ").concat(reason || 'I made it the fuck up'));
 
                     case 3:
                       _context14.next = 5;

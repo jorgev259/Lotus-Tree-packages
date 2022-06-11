@@ -327,7 +327,7 @@ var _default = {
                           case 2:
                             row = _context4.sent;
                             _context4.next = 5;
-                            return sendEmbed(msg, row);
+                            return sendEmbed(msg, row, transaction);
 
                           case 5:
                             _context4.next = 7;
@@ -465,12 +465,12 @@ var _default = {
 };
 exports["default"] = _default;
 
-function sendEmbed(_x2, _x3) {
+function sendEmbed(_x2, _x3, _x4) {
   return _sendEmbed.apply(this, arguments);
 }
 
 function _sendEmbed() {
-  _sendEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(msg, request) {
+  _sendEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(msg, request, transaction) {
     var embed, sent;
     return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) {
@@ -492,7 +492,9 @@ function _sendEmbed() {
             sent = _context8.sent;
             request.message = sent.id;
             _context8.next = 9;
-            return request.save();
+            return request.save({
+              transaction: transaction
+            });
 
           case 9:
           case "end":

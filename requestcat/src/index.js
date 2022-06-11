@@ -1,8 +1,9 @@
 import Sequelize, { DataTypes } from 'sequelize'
+import commands from './commands'
 
 export default {
   name: 'requestcat',
-  commands: require('./commands'),
+  commands,
   events: {
     async ready (globals) {
       const { configFile, client } = globals

@@ -7,8 +7,25 @@ var _typeof = require("@babel/runtime/helpers/typeof");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var _exportNames = {};
+Object.defineProperty(exports, "completeRequest", {
+  enumerable: true,
+  get: function get() {
+    return _commands.completeRequest;
+  }
+});
 exports["default"] = void 0;
+Object.defineProperty(exports, "holdRequest", {
+  enumerable: true,
+  get: function get() {
+    return _commands.holdRequest;
+  }
+});
+Object.defineProperty(exports, "rejectRequest", {
+  enumerable: true,
+  get: function get() {
+    return _commands.rejectRequest;
+  }
+});
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -17,18 +34,6 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _sequelize = _interopRequireWildcard(require("sequelize"));
 
 var _commands = require("./commands");
-
-Object.keys(_commands).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  if (key in exports && exports[key] === _commands[key]) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _commands[key];
-    }
-  });
-});
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 

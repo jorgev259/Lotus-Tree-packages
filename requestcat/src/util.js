@@ -131,7 +131,7 @@ export async function rejectRequest (client, socdb, guildId, request, reason) {
   await socdb.transaction(async transaction => {
     const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
     await reqMsg.delete()
-    await request.delete()
+    await request.destroy()
   })
     .then(async () => {
       const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')

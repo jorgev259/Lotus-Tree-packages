@@ -1,7 +1,5 @@
 import Sequelize, { DataTypes } from 'sequelize'
-import { holdRequest, rejectRequest, completeRequest } from './commands'
 
-export { holdRequest, rejectRequest, completeRequest }
 export default {
   name: 'requestcat',
   commands: require('./commands'),

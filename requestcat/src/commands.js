@@ -96,7 +96,7 @@ export default {
 
       socdb.transaction(async transaction => {
         const row = await socdb.models.request.create(request, { transaction })
-        await sendEmbed(msg, row)
+        await sendEmbed(msg, row, transaction)
         await msg.reply('Request submitted')
       })
         .then(() => checkLockChannel(socdb, msg.guild))
@@ -134,10 +134,10 @@ export default {
   }
 }
 
-async function sendEmbed (msg, request) {
+async function sendEmbed (msg, request, transaction) {
   const embed = await getEmbed(request)
 
   const sent = await msg.guild.channels.cache.find(c => c.name === 'open-requests').send({ embeds: [embed] })
   request.message = sent.id
-  await request.save()
+  await request.save({ transaction })
 }

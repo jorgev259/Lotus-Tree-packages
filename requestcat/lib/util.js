@@ -470,7 +470,7 @@ function _rejectRequest() {
 
                       case 5:
                         _context10.next = 7;
-                        return request["delete"]();
+                        return request.destroy();
 
                       case 7:
                       case "end":

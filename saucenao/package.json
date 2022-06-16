@@ -1,7 +1,7 @@
 {
     "name": "@lotus-tree/saucenao",
     "packageManager": "yarn@3.0.0",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "main": "lib/index.js",
     "scripts": {
         "run-babel": "babel --delete-dir-on-start --copy-files src",

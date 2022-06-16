@@ -8,7 +8,7 @@ function handleFetch (msg, url, score) {
     const { json } = response
     const { results = [] } = json
 
-    const finalResults = results.filter(e => parseFloat(e.header.similarity) >= score).sort((a, b) => a - b)
+    const finalResults = results.filter(e => parseFloat(e.header.similarity) >= score && (e.data.pixiv_id || e.data.ext_urls)).sort((a, b) => a - b)
 
     if (finalResults.length) {
       msg.channel.send(`Found source: ${finalResults.map(e =>

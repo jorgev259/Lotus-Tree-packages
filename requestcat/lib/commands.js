@@ -461,6 +461,76 @@ var _default = {
         }, _callee7);
       }))();
     }
+  },
+  check: {
+    desc: 'Checks for existing requests',
+    usage: 'check [url or title]',
+    execute: function execute(_ref14, _ref15) {
+      return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
+        var client, param, socdb, configFile, msg, urlSearch, request, titleSearch;
+        return _regenerator["default"].wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                client = _ref14.client, param = _ref14.param, socdb = _ref14.socdb, configFile = _ref14.configFile;
+                msg = _ref15.message;
+
+                if (param[1]) {
+                  _context8.next = 4;
+                  break;
+                }
+
+                return _context8.abrupt("return", msg.reply('Incomplete command.'));
+
+              case 4:
+                urlSearch = param[1];
+                _context8.next = 7;
+                return socdb.models.request.findOne({
+                  where: {
+                    link: urlSearch
+                  }
+                });
+
+              case 7:
+                request = _context8.sent;
+
+                if (!request) {
+                  _context8.next = 10;
+                  break;
+                }
+
+                return _context8.abrupt("return", msg.reply("Found request: ".concat(request.title ? "".concat(request.title, " - ") : '').concat(request.link ? "<".concat(request.link, "> - ") : '').concat(request.state, " - ").concat(request.user || 'Unknown User')));
+
+              case 10:
+                titleSearch = param.slice(1).join(' ').toLowerCase();
+                _context8.next = 13;
+                return socdb.models.request.findAll({
+                  where: (0, _sequelize.where)((0, _sequelize.fn)('LOWER', (0, _sequelize.col)('title')), (0, _defineProperty2["default"])({}, _sequelize.Op.like, "%".concat(titleSearch, "%")))
+                });
+
+              case 13:
+                request = _context8.sent;
+
+                if (!(request.length > 0)) {
+                  _context8.next = 16;
+                  break;
+                }
+
+                return _context8.abrupt("return", msg.reply("Found requests: ```".concat(request.map(function (r) {
+                  return "- ".concat(r.title ? "".concat(r.title, " - ") : '').concat(r.link ? "".concat(r.link, " - ") : '').concat(r.state, " - ").concat(r.user || 'Unknown User');
+                }).join('\n'), "```")));
+
+              case 16:
+                msg.reply('No requests found');
+
+              case 17:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8);
+      }))();
+    }
   }
 };
 exports["default"] = _default;
@@ -470,18 +540,18 @@ function sendEmbed(_x2, _x3, _x4) {
 }
 
 function _sendEmbed() {
-  _sendEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(msg, request, transaction) {
+  _sendEmbed = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(msg, request, transaction) {
     var embed, sent;
-    return _regenerator["default"].wrap(function _callee8$(_context8) {
+    return _regenerator["default"].wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
-            _context8.next = 2;
+            _context9.next = 2;
             return (0, _util.getEmbed)(request);
 
           case 2:
-            embed = _context8.sent;
-            _context8.next = 5;
+            embed = _context9.sent;
+            _context9.next = 5;
             return msg.guild.channels.cache.find(function (c) {
               return c.name === 'open-requests';
             }).send({
@@ -489,19 +559,19 @@ function _sendEmbed() {
             });
 
           case 5:
-            sent = _context8.sent;
+            sent = _context9.sent;
             request.message = sent.id;
-            _context8.next = 9;
+            _context9.next = 9;
             return request.save({
               transaction: transaction
             });
 
           case 9:
           case "end":
-            return _context8.stop();
+            return _context9.stop();
         }
       }
-    }, _callee8);
+    }, _callee9);
   }));
   return _sendEmbed.apply(this, arguments);
 }

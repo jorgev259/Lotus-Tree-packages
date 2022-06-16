@@ -138,17 +138,20 @@ export default {
     usage: 'check [url or title]',
     async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[1]) return msg.reply('Incomplete command.')
+
+      function sendRequests (requests) {
+        return msg.reply(`Found requests: \`\`\`${request.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``)
+      }
+
       const urlSearch = param[1]
       let request = await socdb.models.request.findOne({ where: { link: urlSearch } })
-      if (request) return msg.reply(`Found request: ${request.title ? `${request.title} - ` : ''}${request.link ? `<${request.link}> - ` : ''}${request.state} - ${request.user || 'Unknown User'}`)
+      if (request) return await sendRequests([request])
 
       const titleSearch = param.slice(1).join(' ').toLowerCase()
       request = await socdb.models.request.findAll({ where: where(fn('LOWER', col('title')), { [Op.like]: `%${titleSearch}%` }) })
-      if (request.length > 0) {
-        return msg.reply(`Found requests: \`\`\`${request.map(r => `- ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``)
-      }
+      if (request.length > 0) return await sendRequests(request)
 
-      msg.reply('No requests found')
+      await msg.reply('No requests found')
     }
   }
 }

@@ -5,9 +5,13 @@ let mySauce
 
 function handleFetch (msg, url, score) {
   mySauce(url).then(response => {
-    const results = response.json.results.filter(e => parseFloat(e.header.similarity) >= score).sort((a, b) => a - b)
-    if (results.length) {
-      msg.channel.send(`Found source: ${results.map(e =>
+    const { json } = response
+    const { results = [] } = json
+
+    const finalResults = results.filter(e => parseFloat(e.header.similarity) >= score).sort((a, b) => a - b)
+
+    if (finalResults.length) {
+      msg.channel.send(`Found source: ${finalResults.map(e =>
           e.data.pixiv_id
             ? `<https://www.pixiv.net/en/artworks/${e.data.pixiv_id}>`
             : e.data.ext_urls.map(url => `<${url}>`).join(' - ')

@@ -25,7 +25,7 @@ jobs:
     with:
       folder: 'requestcat'
 
-  requestcat:
+  saucenao:
     uses: ./.github/workflows/action.yml
     secrets: inherit
     with:

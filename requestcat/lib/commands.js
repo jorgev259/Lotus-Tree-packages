@@ -467,63 +467,76 @@ var _default = {
     usage: 'check [url or title]',
     execute: function execute(_ref14, _ref15) {
       return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-        var client, param, socdb, configFile, msg, urlSearch, request, titleSearch;
+        var client, param, socdb, configFile, msg, sendRequests, urlSearch, request, titleSearch;
         return _regenerator["default"].wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
+                sendRequests = function _sendRequests(requests) {
+                  return msg.reply("Found requests: ```".concat(request.map(function (r) {
+                    return "\u2022 ".concat(r.title ? "".concat(r.title, " - ") : '').concat(r.link ? "".concat(r.link, " - ") : '').concat(r.state, " - ").concat(r.user || 'Unknown User');
+                  }).join('\n'), "```"));
+                };
+
                 client = _ref14.client, param = _ref14.param, socdb = _ref14.socdb, configFile = _ref14.configFile;
                 msg = _ref15.message;
 
                 if (param[1]) {
-                  _context8.next = 4;
+                  _context8.next = 5;
                   break;
                 }
 
                 return _context8.abrupt("return", msg.reply('Incomplete command.'));
 
-              case 4:
+              case 5:
                 urlSearch = param[1];
-                _context8.next = 7;
+                _context8.next = 8;
                 return socdb.models.request.findOne({
                   where: {
                     link: urlSearch
                   }
                 });
 
-              case 7:
+              case 8:
                 request = _context8.sent;
 
                 if (!request) {
-                  _context8.next = 10;
+                  _context8.next = 13;
                   break;
                 }
 
-                return _context8.abrupt("return", msg.reply("Found request: ".concat(request.title ? "".concat(request.title, " - ") : '').concat(request.link ? "<".concat(request.link, "> - ") : '').concat(request.state, " - ").concat(request.user || 'Unknown User')));
+                _context8.next = 12;
+                return sendRequests([request]);
 
-              case 10:
+              case 12:
+                return _context8.abrupt("return", _context8.sent);
+
+              case 13:
                 titleSearch = param.slice(1).join(' ').toLowerCase();
-                _context8.next = 13;
+                _context8.next = 16;
                 return socdb.models.request.findAll({
                   where: (0, _sequelize.where)((0, _sequelize.fn)('LOWER', (0, _sequelize.col)('title')), (0, _defineProperty2["default"])({}, _sequelize.Op.like, "%".concat(titleSearch, "%")))
                 });
 
-              case 13:
+              case 16:
                 request = _context8.sent;
 
                 if (!(request.length > 0)) {
-                  _context8.next = 16;
+                  _context8.next = 21;
                   break;
                 }
 
-                return _context8.abrupt("return", msg.reply("Found requests: ```".concat(request.map(function (r) {
-                  return "- ".concat(r.title ? "".concat(r.title, " - ") : '').concat(r.link ? "".concat(r.link, " - ") : '').concat(r.state, " - ").concat(r.user || 'Unknown User');
-                }).join('\n'), "```")));
+                _context8.next = 20;
+                return sendRequests(request);
 
-              case 16:
-                msg.reply('No requests found');
+              case 20:
+                return _context8.abrupt("return", _context8.sent);
 
-              case 17:
+              case 21:
+                _context8.next = 23;
+                return msg.reply('No requests found');
+
+              case 23:
               case "end":
                 return _context8.stop();
             }

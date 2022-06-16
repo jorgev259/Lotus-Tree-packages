@@ -467,13 +467,13 @@ var _default = {
     usage: 'check [url or title]',
     execute: function execute(_ref14, _ref15) {
       return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-        var client, param, socdb, configFile, msg, sendRequests, urlSearch, request, titleSearch;
+        var client, param, socdb, configFile, msg, sendRequests, urlSearch, request, titleSearch, requests;
         return _regenerator["default"].wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                sendRequests = function _sendRequests(requests) {
-                  return msg.reply("Found requests: ```".concat(request.map(function (r) {
+                sendRequests = function _sendRequests(list) {
+                  return msg.reply("Found requests: ```".concat(list.map(function (r) {
                     return "\u2022 ".concat(r.title ? "".concat(r.title, " - ") : '').concat(r.link ? "".concat(r.link, " - ") : '').concat(r.state, " - ").concat(r.user || 'Unknown User');
                   }).join('\n'), "```"));
                 };
@@ -519,15 +519,15 @@ var _default = {
                 });
 
               case 16:
-                request = _context8.sent;
+                requests = _context8.sent;
 
-                if (!(request.length > 0)) {
+                if (!(requests.length > 0)) {
                   _context8.next = 21;
                   break;
                 }
 
                 _context8.next = 20;
-                return sendRequests(request);
+                return sendRequests(requests);
 
               case 20:
                 return _context8.abrupt("return", _context8.sent);

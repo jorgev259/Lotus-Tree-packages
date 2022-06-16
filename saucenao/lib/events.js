@@ -29,7 +29,7 @@ function handleFetch(msg, url, score) {
     var _json$results = json.results,
         results = _json$results === void 0 ? [] : _json$results;
     var finalResults = results.filter(function (e) {
-      return parseFloat(e.header.similarity) >= score;
+      return parseFloat(e.header.similarity) >= score && (e.data.pixiv_id || e.data.ext_urls);
     }).sort(function (a, b) {
       return a - b;
     });

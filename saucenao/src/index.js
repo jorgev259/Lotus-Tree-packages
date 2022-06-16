@@ -1,21 +1,22 @@
-const { DataTypes } = require('sequelize')
-const { STRING } = DataTypes
+import { DataTypes } from 'sequelize'
+import events from './events'
+import commands from './commands'
 
-module.exports = {
+export default {
   name: 'saucenao',
   config: { guild: { saucescore: '70' } },
   preload (sequelize) {
     sequelize.define('saucenao', {
       guild: {
-        type: STRING,
+        type: DataTypes.STRING,
         primaryKey: true
       },
       channel: {
-        type: STRING,
+        type: DataTypes.STRING,
         primaryKey: true
       }
     })
   },
-  events: require('./events'),
-  commands: require('./commands')
+  events,
+  commands
 }

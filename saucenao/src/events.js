@@ -1,5 +1,5 @@
-const SauceNAO = require('saucenao')
-const getUrls = require('get-urls')
+import SauceNAO from 'saucenao'
+import getUrls from 'get-urls'
 
 let mySauce
 
@@ -24,7 +24,7 @@ function handleFetch (msg, url, score) {
   })
 }
 
-module.exports = {
+export default {
   async guildCreate ({ sequelize, config }, guild) {
     config[guild.id].saucenao = new Set()
   },

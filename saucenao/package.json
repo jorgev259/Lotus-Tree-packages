@@ -1,7 +1,20 @@
 {
     "name": "@lotus-tree/saucenao",
     "packageManager": "yarn@3.0.0",
-    "version": "1.1.1",
+    "version": "1.2.0",
+    "main": "lib/index.js",
+    "scripts": {
+        "run-babel": "babel --delete-dir-on-start --copy-files src",
+        "build": "yarn run run-babel --out-dir lib",
+        "dev": "yarn run run-babel --watch --source-maps inline --out-dir dev"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.16.7",
+        "@babel/core": "^7.16.7",
+        "@babel/node": "^7.16.7",
+        "@babel/plugin-transform-runtime": "^7.16.7",
+        "@babel/preset-env": "^7.16.7"
+    },
     "dependencies": {
         "get-urls": "^10.0.0",
         "saucenao": "https://github.com/jorgev259/saucenao-node",

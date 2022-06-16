@@ -139,17 +139,17 @@ export default {
     async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[1]) return msg.reply('Incomplete command.')
 
-      function sendRequests (requests) {
-        return msg.reply(`Found requests: \`\`\`${request.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``)
+      function sendRequests (list) {
+        return msg.reply(`Found requests: \`\`\`${list.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``)
       }
 
       const urlSearch = param[1]
-      let request = await socdb.models.request.findOne({ where: { link: urlSearch } })
+      const request = await socdb.models.request.findOne({ where: { link: urlSearch } })
       if (request) return await sendRequests([request])
 
       const titleSearch = param.slice(1).join(' ').toLowerCase()
-      request = await socdb.models.request.findAll({ where: where(fn('LOWER', col('title')), { [Op.like]: `%${titleSearch}%` }) })
-      if (request.length > 0) return await sendRequests(request)
+      const requests = await socdb.models.request.findAll({ where: where(fn('LOWER', col('title')), { [Op.like]: `%${titleSearch}%` }) })
+      if (requests.length > 0) return await sendRequests(requests)
 
       await msg.reply('No requests found')
     }

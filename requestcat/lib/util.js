@@ -319,28 +319,42 @@ function _completeRequest() {
                   while (1) {
                     switch (_context6.prev = _context6.next) {
                       case 0:
-                        _context6.next = 2;
+                        _context6.prev = 0;
+                        _context6.next = 3;
                         return guild.channels.cache.find(function (c) {
                           return c.name === 'open-requests';
                         }).messages.fetch(request.message);
 
-                      case 2:
+                      case 3:
                         reqMsg = _context6.sent;
-                        _context6.next = 5;
+                        _context6.next = 6;
                         return reqMsg["delete"]();
 
-                      case 5:
+                      case 6:
+                        _context6.next = 11;
+                        break;
+
+                      case 8:
+                        _context6.prev = 8;
+                        _context6.t0 = _context6["catch"](0);
+                        catchErr(guild, _context6.t0);
+
+                      case 11:
+                        _context6.prev = 11;
                         request.state = 'complete';
                         request.message = null;
-                        _context6.next = 9;
+                        _context6.next = 16;
                         return request.save();
 
-                      case 9:
+                      case 16:
+                        return _context6.finish(11);
+
+                      case 17:
                       case "end":
                         return _context6.stop();
                     }
                   }
-                }, _callee6);
+                }, _callee6, null, [[0, 8, 11, 17]]);
               }));
 
               return function (_x22) {

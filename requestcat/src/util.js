@@ -96,13 +96,16 @@ export async function completeRequest (client, socdb, guildId, request) {
   const guild = await client.guilds.fetch(guildId)
 
   await socdb.transaction(async transaction => {
-    const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
-
-    await reqMsg.delete()
-
-    request.state = 'complete'
-    request.message = null
-    await request.save()
+    try {
+      const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
+      await reqMsg.delete()
+    } catch (err) {
+      catchErr(guild, err)
+    } finally {
+      request.state = 'complete'
+      request.message = null
+      await request.save()
+    }
   })
     .then(() => checkLockChannel(socdb, guild))
     .catch(err => catchErr(guild, err))

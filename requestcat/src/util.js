@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js'
+// import { Permissions } from 'discord.js'
 import { get } from 'axios'
 
 export async function getVGMDB (link) {
@@ -74,7 +74,7 @@ export function catchErr (guild, err) {
 }
 
 export async function checkLockChannel (socdb, guild) {
-  const countPending = await getPendingCount(socdb)
+  /* const countPending = await getPendingCount(socdb)
   const channel = guild.channels.cache.find(c => c.name === 'request-submission')
   const membersRole = guild.roles.cache.find(r => r.name === 'Members')
   const permissions = channel.permissionsFor(membersRole)
@@ -87,7 +87,7 @@ export async function checkLockChannel (socdb, guild) {
       await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: true })
       await channel.send('Requests open')
     }
-  }
+  } */
 }
 
 export const getPendingCount = socdb => socdb.models.request.count({ where: { state: 'pending', donator: false } })

@@ -18,10 +18,9 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _discord = require("discord.js");
-
 var _axios = require("axios");
 
+// import { Permissions } from 'discord.js'
 function getVGMDB(_x) {
   return _getVGMDB.apply(this, arguments);
 }
@@ -223,58 +222,10 @@ function checkLockChannel(_x6, _x7) {
 
 function _checkLockChannel() {
   _checkLockChannel = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(socdb, guild) {
-    var countPending, channel, membersRole, permissions;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _context5.next = 2;
-            return getPendingCount(socdb);
-
-          case 2:
-            countPending = _context5.sent;
-            channel = guild.channels.cache.find(function (c) {
-              return c.name === 'request-submission';
-            });
-            membersRole = guild.roles.cache.find(function (r) {
-              return r.name === 'Members';
-            });
-            permissions = channel.permissionsFor(membersRole);
-
-            if (!(countPending >= 20 && permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
-              _context5.next = 13;
-              break;
-            }
-
-            _context5.next = 9;
-            return channel.permissionOverwrites.edit(membersRole, {
-              SEND_MESSAGES: false
-            });
-
-          case 9:
-            _context5.next = 11;
-            return channel.send('Requests closed');
-
-          case 11:
-            _context5.next = 18;
-            break;
-
-          case 13:
-            if (!(countPending < 20 && !permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
-              _context5.next = 18;
-              break;
-            }
-
-            _context5.next = 16;
-            return channel.permissionOverwrites.edit(membersRole, {
-              SEND_MESSAGES: true
-            });
-
-          case 16:
-            _context5.next = 18;
-            return channel.send('Requests open');
-
-          case 18:
           case "end":
             return _context5.stop();
         }

@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/command-handler",
-  "version": "2.1.1",
+  "version": "2.1.9",
   "main": "lib/index.js",
   "scripts": {
     "run-babel" : "babel --delete-dir-on-start --source-maps inline --copy-files src",

@@ -31,3 +31,9 @@ jobs:
     with:
       folder: 'saucenao'
 
+  saucenao:
+    uses: ./.github/workflows/action.yml
+    secrets: inherit
+    with:
+      folder: 'reactgatekeep'
+

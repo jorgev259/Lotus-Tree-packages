@@ -40,10 +40,12 @@ const module = {
       const channels = await guild.channels.fetch()
       const channel = channels.find(c => c.name.toLowerCase() === 'general')
 
+      if (member.roles.cache.has(role.id)) return member.timeout(5 * 60 * 1000, 'Blame Levita')
+
       member.roles.add(role)
       reaction.remove()
 
-      if (gatekeepannouce) channel.send(`Welcome, ${member} I hope you enjoy your stay~!`)
+      if (gatekeepannouce) channel.send(`Thanks for reading the rules! Welcome, ${member} I hope you enjoy your stay~!`)
     }
   }
 }

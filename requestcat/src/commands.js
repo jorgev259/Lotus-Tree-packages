@@ -139,8 +139,18 @@ export default {
     async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[1]) return msg.reply('Incomplete command.')
 
-      function sendRequests (list) {
-        return msg.reply(`Found requests: \`\`\`${list.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``)
+      function sendRequests (list) {     
+        try {
+          const output = `Found requests: \`\`\`${list.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``
+          if(output.length >= 2000) {
+            const outputError = msg.author.id === '350059361789280277' ? 'Bitch :bingus:' : 'Result list was too big, be more specific or use the Requests section in the website'
+            return msg.reply(outputError)
+          } else {
+            return msg.reply(output)
+          }        
+        } catch(err){
+          msg.reply('Something went wrong')
+        }
       }
 
       const urlSearch = param[1]
@@ -149,9 +159,9 @@ export default {
 
       const titleSearch = param.slice(1).join(' ').toLowerCase()
       const requests = await socdb.models.request.findAll({ where: where(fn('LOWER', col('title')), { [Op.like]: `%${titleSearch}%` }) })
-      if (requests.length > 0) return await sendRequests(requests)
-
-      await msg.reply('No requests found')
+      if (requests.length > 0) await sendRequests(requests)
+      else await msg.reply('No requests found')
+      
     }
   }
 }

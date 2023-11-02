@@ -77,6 +77,7 @@ export async function checkLockChannel (socdb, guild) {
   const countPending = await getPendingCount(socdb)
   const channel = guild.channels.cache.find(c => c.name === 'request-submission')
   const membersRole = guild.roles.cache.find(r => r.name === 'Members')
+  const camperRole = guild.roles.cache.find(r => r.name === 'Request Camper')
   const permissions = channel.permissionsFor(membersRole)
 
   if (countPending >= 20 && permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
@@ -85,7 +86,7 @@ export async function checkLockChannel (socdb, guild) {
   } else {
     if (countPending < 20 && !permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
       await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: true })
-      await channel.send('Requests open')
+      await channel.send(`Ayo ${camperRole}, requests are open`)
     }
   }
 }

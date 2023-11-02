@@ -1,12 +1,12 @@
 {
   "name": "@lotus-tree/requestcat",
-  "version": "3.4.6",
+  "version": "3.5.0",
   "packageManager": "yarn@3.0.2",
   "main": "lib/index.js",
   "scripts": {
-    "run-babel": "babel --delete-dir-on-start --copy-files src",
-    "build": "yarn run run-babel --out-dir lib",
-    "dev": "yarn run run-babel --watch --source-maps inline --out-dir dev"
+    "run-babel": "babel --delete-dir-on-start --copy-files --out-dir lib src",
+    "build": "npm run run-babel --out-dir lib",
+    "dev": "npm run run-babel --watch --source-maps inline --out-dir dev"
   },
   "dependencies": {
     "axios": "^0.24.0",

@@ -8,7 +8,7 @@ exports["default"] = void 0;
 var _sequelize = require("sequelize");
 var _events = _interopRequireDefault(require("./events"));
 var _commands = _interopRequireDefault(require("./commands"));
-var _default = {
+var _default = exports["default"] = {
   name: 'saucenao',
   config: {
     guild: {
@@ -30,4 +30,3 @@ var _default = {
   events: _events["default"],
   commands: _commands["default"]
 };
-exports["default"] = _default;

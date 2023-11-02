@@ -35,7 +35,7 @@ function handleFetch(msg, url, score) {
     console.dir(error.request || error);
   });
 }
-var _default = {
+var _default = exports["default"] = {
   guildCreate: function guildCreate(_ref, guild) {
     return (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
       var sequelize, config;
@@ -124,4 +124,3 @@ var _default = {
     }))();
   }
 };
-exports["default"] = _default;

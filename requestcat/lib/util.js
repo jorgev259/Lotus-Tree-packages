@@ -179,7 +179,7 @@ function checkLockChannel(_x6, _x7) {
 }
 function _checkLockChannel() {
   _checkLockChannel = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(socdb, guild) {
-    var countPending, channel, membersRole, permissions;
+    var countPending, channel, membersRole, camperRole, permissions;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
@@ -193,34 +193,37 @@ function _checkLockChannel() {
           membersRole = guild.roles.cache.find(function (r) {
             return r.name === 'Members';
           });
+          camperRole = guild.roles.cache.find(function (r) {
+            return r.name === 'Request Camper';
+          });
           permissions = channel.permissionsFor(membersRole);
           if (!(countPending >= 20 && permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
-            _context5.next = 13;
+            _context5.next = 14;
             break;
           }
-          _context5.next = 9;
+          _context5.next = 10;
           return channel.permissionOverwrites.edit(membersRole, {
             SEND_MESSAGES: false
           });
-        case 9:
-          _context5.next = 11;
+        case 10:
+          _context5.next = 12;
           return channel.send('Requests closed');
-        case 11:
-          _context5.next = 18;
+        case 12:
+          _context5.next = 19;
           break;
-        case 13:
+        case 14:
           if (!(countPending < 20 && !permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
-            _context5.next = 18;
+            _context5.next = 19;
             break;
           }
-          _context5.next = 16;
+          _context5.next = 17;
           return channel.permissionOverwrites.edit(membersRole, {
             SEND_MESSAGES: true
           });
-        case 16:
-          _context5.next = 18;
-          return channel.send('Requests open');
-        case 18:
+        case 17:
+          _context5.next = 19;
+          return channel.send("Ayo ".concat(camperRole, ", requests are open"));
+        case 19:
         case "end":
           return _context5.stop();
       }

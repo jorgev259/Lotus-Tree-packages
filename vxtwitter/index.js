@@ -16,9 +16,15 @@ module.exports = {
             content = content.replaceAll(search, 'https://vxtwitter.com')
           }
 
+          const mentions = msg.mentions.users.keys()
+            .filter(snowflake => snowflake !== msg.author.id)
+
           msg.channel.send({
             content: `${msg.author}: ${content}`,
-            allowedMentions: {users: []}
+            allowedMentions: {
+              repliedUser: false,
+              users: mentions
+            }
           })
             .then(() => msg.delete())
         }

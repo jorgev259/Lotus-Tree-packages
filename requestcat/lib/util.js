@@ -14,7 +14,7 @@ exports.holdRequest = holdRequest;
 exports.rejectRequest = rejectRequest;
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-var _discord = require("discord.js");
+var _httpOnly = require("@discordjs/core/http-only");
 var _axios = require("axios");
 function getVGMDB(_x) {
   return _getVGMDB.apply(this, arguments);
@@ -197,7 +197,7 @@ function _checkLockChannel() {
             return r.name === 'Request Camper';
           });
           permissions = channel.permissionsFor(membersRole);
-          if (!(countPending >= 20 && permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
+          if (!(countPending >= 20 && permissions.has(_httpOnly.PermissionsBitField.Flags.SendMessages))) {
             _context5.next = 14;
             break;
           }
@@ -212,7 +212,7 @@ function _checkLockChannel() {
           _context5.next = 19;
           break;
         case 14:
-          if (!(countPending < 20 && !permissions.has(_discord.Permissions.FLAGS.SEND_MESSAGES))) {
+          if (!(countPending < 20 && !permissions.has(_httpOnly.PermissionsBitField.Flags.SendMessages))) {
             _context5.next = 19;
             break;
           }

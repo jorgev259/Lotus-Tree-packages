@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js'
+import { PermissionsBitField } from '@discordjs/core/http-only'
 import { get } from 'axios'
 
 export async function getVGMDB (link) {
@@ -80,11 +80,11 @@ export async function checkLockChannel (socdb, guild) {
   const camperRole = guild.roles.cache.find(r => r.name === 'Request Camper')
   const permissions = channel.permissionsFor(membersRole)
 
-  if (countPending >= 20 && permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+  if (countPending >= 20 && permissions.has(PermissionsBitField.Flags.SendMessages)) {
     await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: false })
     await channel.send('Requests closed')
   } else {
-    if (countPending < 20 && !permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+    if (countPending < 20 && !permissions.has(PermissionsBitField.Flags.SendMessages)) {
       await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: true })
       await channel.send(`Ayo ${camperRole}, requests are open`)
     }

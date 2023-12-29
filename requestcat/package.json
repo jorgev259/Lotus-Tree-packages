@@ -1,7 +1,6 @@
 {
   "name": "@lotus-tree/requestcat",
-  "version": "3.5.0",
-  "packageManager": "yarn@3.0.2",
+  "version": "4.0.0",
   "main": "lib/index.js",
   "scripts": {
     "run-babel": "babel --delete-dir-on-start --copy-files --out-dir lib src",
@@ -10,8 +9,8 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
+    "discord.js": "^14.14.1",
     "get-urls": "^10.0.1",
-    "google-spreadsheet": "^3.2.0",
     "moment": "^2.29.1"
   },
   "devDependencies": {

@@ -1,21 +1,20 @@
 {
   "name": "@lotus-tree/command-handler",
-  "version": "2.1.9",
+  "version": "3.0.0",
   "main": "lib/index.js",
   "scripts": {
-    "run-babel" : "babel --delete-dir-on-start --source-maps inline --copy-files src",
-    "build": "yarn run run-babel --out-dir lib",
-    "dev": "yarn run run-babel --watch --out-dir dev",
-    "prepublishOnly": "yarn build"
+    "run-babel": "babel --delete-dir-on-start --source-maps inline --copy-files src",
+    "build": "npm run run-babel --out-dir lib",
+    "dev": "npm run run-babel --watch --out-dir dev",
+    "prepublishOnly": "npm build"
   },
   "dependencies": {
+    "discord.js": "^14.14.1",
     "sequelize": "^6.6.5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.7",
     "@babel/core": "^7.16.7",
     "@babel/node": "^7.16.7",
-    "@babel/plugin-transform-runtime": "^7.16.7",
     "@babel/preset-env": "^7.16.7"
   }
 }

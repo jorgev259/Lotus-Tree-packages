@@ -8,7 +8,7 @@ on:
 
 jobs:
   command-handler:
-    uses: ./.github/workflows/action.yml
+    uses: ./.github/workflows/new-action.yml
     secrets: inherit
     with:
       folder: 'command-handler'

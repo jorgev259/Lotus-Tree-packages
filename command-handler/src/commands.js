@@ -1,6 +1,6 @@
-const { permCheck, permGet } = require('./util')
+import { permCheck, permGet } from './util'
 
-module.exports = {
+const commands = {
   help: {
     usage: 'help [command]',
     desc: 'This command displays information about a command',
@@ -195,3 +195,5 @@ module.exports = {
     }
   }
 }
+
+export default commands

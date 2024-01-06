@@ -1,41 +1,46 @@
-const { DataTypes } = require('sequelize')
+import { DataTypes } from 'sequelize'
+// import { GatewayIntentBits } from 'discord.js'
+
+import { permCheck } from './util'
+import commands from './commands'
+
 const { STRING, BOOLEAN } = DataTypes
-const { permCheck } = require('./util')
 
 async function checkGuild (guild, globals) {
-  if (!globals.config[guild]) globals.config[guild] = {}
-  if (!globals.config.global) globals.config.global = {}
+  const { config, defaultConfig, sequelize, commands, modules } = globals
 
-  for (const [item, value] of Object.entries(globals.defaultConfig.global)) {
-    const [row] = await globals.sequelize.models.config.findOrCreate({ where: { guild: 'global', item }, defaults: { value } })
-    globals.config.global[item] = row.value
+  if (!config[guild]) config[guild] = {}
+  if (!config.global) config.global = {}
+
+  for (const [item, value] of Object.entries(defaultConfig.global)) {
+    const [row] = await sequelize.models.config.findOrCreate({ where: { guild: 'global', item }, defaults: { value } })
+    config.global[item] = row.value
   }
 
-  for (const [item, value] of Object.entries(globals.defaultConfig.guild)) {
-    const [row] = await globals.sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
-    globals.config[guild][item] = row.value
+  for (const [item, value] of Object.entries(defaultConfig.guild)) {
+    const [row] = await sequelize.models.config.findOrCreate({ where: { guild, item }, defaults: { value } })
+    config[guild][item] = row.value
   }
 
-  for (const module of globals.modules.values()) {
-    const [{ value }] = await globals.sequelize.models.module.findOrCreate({ where: { guild, module: module.name } })
+  for (const module of modules.values()) {
+    const [{ value }] = await sequelize.models.module.findOrCreate({ where: { guild, module: module.name } })
     module.enabled[guild] = value
   }
 
-  for (const command of globals.commands.values()) {
-    const [{ value }] = await globals.sequelize.models.command.findOrCreate({ where: { guild, command: command.name } })
+  for (const command of commands.values()) {
+    const [{ value }] = await sequelize.models.command.findOrCreate({ where: { guild, command: command.name } })
     command.enabled[guild] = value
   }
 }
 
-module.exports = {
+const module = {
   name: 'command-handler',
   config: { guild: { prefix: '>' } },
-  commands: require('./commands'),
+  intents: ['Guilds', 'GuildMessages', 'MessageContent'],
+  commands,
   events: {
-    async guildCreate (globals, guild) {
-      await checkGuild(guild.id, globals)
-    },
-    async ready (globals) {
+    guildCreate: (globals, guild) => checkGuild(guild.id, globals),
+    ready: async (globals) => {
       const { client, sequelize } = globals
       sequelize.define('config', {
         guild: { type: STRING, unique: 'index' },
@@ -68,7 +73,7 @@ module.exports = {
       const guilds = await client.guilds.fetch()
       guilds.forEach(guild => checkGuild(guild.id, globals))
     },
-    async messageCreate (global, message) {
+    messageCreate: async (global, message) => {
       const { client, commands, modules, config } = global
       if (message.author.id === client.user.id || !message.member) return
 
@@ -90,3 +95,5 @@ module.exports = {
     }
   }
 }
+
+export default module

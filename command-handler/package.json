@@ -3,8 +3,7 @@
   "version": "3.0.0",
   "main": "lib/index.js",
   "scripts": {
-    "run-babel": "babel --delete-dir-on-start --source-maps inline --copy-files src",
-    "build": "npm run run-babel --out-dir lib",
+    "build": "babel --delete-dir-on-start --source-maps inline --out-dir lib --copy-files src ",
     "dev": "npm run run-babel --watch --out-dir dev",
     "prepublishOnly": "npm build"
   },

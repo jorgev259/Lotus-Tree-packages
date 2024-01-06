@@ -5,7 +5,7 @@
   "scripts": {
     "build": "babel --delete-dir-on-start --source-maps inline --out-dir lib --copy-files src ",
     "dev": "npm run run-babel --watch --out-dir dev",
-    "prepublishOnly": "npm build"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "discord.js": "^14.14.1",

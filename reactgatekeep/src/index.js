@@ -1,19 +1,22 @@
+import { Events, GatewayIntentBits, Partials } from 'discord.js'
 
 const module = {
   name: 'reactgatekeep',
-  intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS'],
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 
   config: {
     guild: {
       gatekeeprole: '',
       gatekeepreaction: '',
+      gatekeepchannel: '',
+      gatekeepwelcomechannel: '',
       gatekeepannouce: true
     }
   },
 
   events: {
-    async messageReactionAdd (globals, reaction, user) {
+    [Events.MessageReactionAdd]: async (globals, reaction, user) => {
       if (reaction.partial) {
         // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
         try {
@@ -27,9 +30,9 @@ const module = {
 
       const { config } = globals
       const { message } = reaction
-      const { gatekeeprole, gatekeepreaction, gatekeepannouce } = config[message.guildId]
+      const { gatekeeprole, gatekeepreaction, gatekeepannouce, gatekeepchannel, gatekeepwelcomechannel } = config[message.guildId]
 
-      if (message.channel.name !== 'rules' || reaction.emoji.name !== gatekeepreaction) return
+      if (message.channel.name !== gatekeepchannel || reaction.emoji.name !== gatekeepreaction) return
 
       const guild = await message.guild.fetch()
       const member = await guild.members.fetch(user.id)
@@ -38,7 +41,7 @@ const module = {
       const role = roles.find(r => r.name === gatekeeprole)
 
       const channels = await guild.channels.fetch()
-      const channel = channels.find(c => c.name.toLowerCase() === 'general')
+      const channel = channels.find(c => c.name.toLowerCase() === gatekeepwelcomechannel)
 
       if (member.roles.cache.has(role.id)) return member.timeout(5 * 60 * 1000, 'Blame Levita')
 

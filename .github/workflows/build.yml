@@ -32,7 +32,7 @@ jobs:
       folder: 'saucenao'
 
   reactgatekeep:
-    uses: ./.github/workflows/action.yml
+    uses: ./.github/workflows/new-action.yml
     secrets: inherit
     with:
       folder: 'reactgatekeep'

@@ -1,4 +1,4 @@
-import { permCheck, permGet } from './util'
+import { permCheck, permGet } from './util.js'
 
 const commands = {
   help: {

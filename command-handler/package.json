@@ -1,20 +1,11 @@
 {
   "name": "@lotus-tree/command-handler",
-  "version": "3.0.0",
-  "main": "lib/index.js",
-  "scripts": {
-    "build": "babel --delete-dir-on-start --source-maps inline --out-dir lib --copy-files src ",
-    "dev": "npm run run-babel --watch --out-dir dev",
-    "prepublishOnly": "npm run build"
-  },
+  "version": "3.0.1",
+  "main": "src/index.js",
+  "type": "module",
+
   "dependencies": {
     "discord.js": "^14.14.1",
     "sequelize": "^6.6.5"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.23.4",
-    "@babel/core": "^7.16.7",
-    "@babel/node": "^7.16.7",
-    "@babel/preset-env": "^7.16.7"
   }
 }

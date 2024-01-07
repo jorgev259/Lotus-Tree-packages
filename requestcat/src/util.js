@@ -1,12 +1,12 @@
-import { PermissionsBitField } from '@discordjs/core/http-only'
-import { get } from 'axios'
+import { PermissionsBitField } from 'discord.js'
+import axios from 'axios'
 
 export async function getVGMDB (link) {
   const url = new URL(link)
   const id = url.pathname.split('/').slice(-1)
 
   try {
-    const response = await get(
+    const response = await axios.get(
     `https://api.nemoralni.site/albums/${id}`,
     { headers: { 'x-api-key': 'i-m-a-pig-i-don-t-fight-for-honor-i-fight-for-a-paycheck' } })
     return response.data

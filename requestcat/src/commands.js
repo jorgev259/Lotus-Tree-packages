@@ -1,9 +1,9 @@
 import { Op, fn, col, where } from 'sequelize'
 import getUrls from 'get-urls'
 
-import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, getVGMDB, catchErr, getEmbed } from './util'
+import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, getVGMDB, catchErr, getEmbed } from './util.js'
 
-export default {
+const commands = {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
@@ -139,16 +139,16 @@ export default {
     async execute ({ client, param, socdb, configFile }, { message: msg }) {
       if (!param[1]) return msg.reply('Incomplete command.')
 
-      function sendRequests (list) {     
+      function sendRequests (list) {
         try {
           const output = `Found requests: \`\`\`${list.map(r => `• ${r.title ? `${r.title} - ` : ''}${r.link ? `${r.link} - ` : ''}${r.state} - ${r.user || 'Unknown User'}`).join('\n')}\`\`\``
-          if(output.length >= 2000) {
+          if (output.length >= 2000) {
             const outputError = msg.author.id === '350059361789280277' ? 'Bitch :bingus:' : 'Result list was too big, be more specific or use the Requests section in the website'
             return msg.reply(outputError)
           } else {
             return msg.reply(output)
-          }        
-        } catch(err){
+          }
+        } catch (err) {
           msg.reply('Something went wrong')
         }
       }
@@ -161,10 +161,11 @@ export default {
       const requests = await socdb.models.request.findAll({ where: where(fn('LOWER', col('title')), { [Op.like]: `%${titleSearch}%` }) })
       if (requests.length > 0) await sendRequests(requests)
       else await msg.reply('No requests found')
-      
     }
   }
 }
+
+export default commands
 
 async function sendEmbed (msg, request, transaction) {
   const embed = await getEmbed(request)

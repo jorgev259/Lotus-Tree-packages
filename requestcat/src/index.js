@@ -1,11 +1,12 @@
 import Sequelize, { DataTypes } from 'sequelize'
-import commands from './commands'
+import commands from './commands.js'
+import { Events } from 'discord.js'
 
-export default {
+const requestCat = {
   name: 'requestcat',
   commands,
   events: {
-    async ready (globals) {
+    [Events.ClientReady]: async (globals) => {
       const { configFile, client } = globals
       const config = configFile.sequelize
 
@@ -36,3 +37,5 @@ export default {
     }
   }
 }
+
+export default requestCat

@@ -7,9 +7,8 @@ const requestCat = {
   commands,
   events: {
     [Events.ClientReady]: async (globals) => {
-      const { configFile, client } = globals
-      const config = configFile.sequelize
-
+      const { lotusConfig, client } = globals
+      const { sequelize: config } = lotusConfig
       config.database = 'soc'
 
       globals.socdb = new Sequelize(config)

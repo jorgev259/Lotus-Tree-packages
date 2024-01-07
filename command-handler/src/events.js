@@ -46,18 +46,31 @@ const events = {
 
     const guildId = message.guildId
     const { prefix } = config[guildId]
+    const botMention = client.user.toString()
+
+    const startsPrefix = message.content.startsWith(prefix)
+    const startsMention = message.content.startsWith(botMention)
+
+    if (!startsPrefix && !startsMention) return
+
+    let param, commandName
 
     if (message.content.startsWith(prefix)) {
-      const param = message.content.split(' ')
-      const commandName = param[0].toLowerCase().substring(prefix.length)
+      param = message.content.trim().split(' ')
+      commandName = param[0].toLowerCase().substring(prefix.length)
+    }
 
-      if (!commands.has(commandName)) return
-      const command = commands.get(commandName)
-      const module = modules.get(command.moduleName)
+    if (message.content.startsWith(botMention)) {
+      param = message.content.replace(botMention, '').trim().split(' ')
+      commandName = param[0].toLowerCase()
+    }
 
-      if (module.enabled[guildId] && command.enabled[guildId] && await permCheck(command, message, global)) {
-        command.execute({ ...global, param }, { message })
-      }
+    if (!commands.has(commandName)) return
+    const command = commands.get(commandName)
+    const module = modules.get(command.moduleName)
+
+    if (module.enabled[guildId] && command.enabled[guildId] && await permCheck(command, message, global)) {
+      command.execute({ ...global, param }, { message })
     }
   }
 }

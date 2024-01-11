@@ -41,7 +41,7 @@ const events = {
     guilds.forEach(guild => checkGuildConfig(guild.id, globals))
   },
   [Events.MessageCreate]: async (global, message) => {
-    const { client, commands, modules, config } = global
+    const { client, commands, modules, config, localConfig } = global
     if (message.author.id === client.user.id || !message.member) return
 
     const guildId = message.guildId
@@ -67,10 +67,11 @@ const events = {
 
     if (!commands.has(commandName)) return
     const command = commands.get(commandName)
-    const module = modules.get(command.moduleName)
+    const { moduleName } = command
+    const module = modules.get(moduleName)
 
     if (module.enabled[guildId] && command.enabled[guildId] && await permCheck(command, message, global)) {
-      command.execute({ ...global, param }, { message })
+      command.execute({ ...global, param, localConfig: localConfig[moduleName] }, { message })
     }
   }
 }

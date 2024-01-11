@@ -4,7 +4,7 @@ module.exports = {
   about: 'Text shown on >about command from @lotus-tree/command-handler',
 
   config: { guild: { }, global: {} }, // Runtime configuration fields
-  // defaultConfig: {}, // Default startup configuration, used to create .json file in /config folder
+  localConfig: {}, // File based configuration
 
   // discord.js client configuration. (https://discordjs.guide/popular-topics/intents.html#enabling-intents)
   intents: [],

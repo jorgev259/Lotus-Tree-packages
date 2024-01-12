@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/requestcat",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "main": "src/index.js",
   "type": "module",
   "dependencies": {
@@ -10,14 +10,5 @@
     "express": "^4.18.2",
     "get-urls": "^10.0.1",
     "sequelize": "^6.6.5"
-  },
-  "peerDependencies": {
-    "mariadb": "^2.5.4",
-    "mysql2": "^2.3.0",
-    "pg": "^8.7.1",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.6.5",
-    "sqlite3": "^5.0.2",
-    "tedious": "^11.4.0"
   }
 }

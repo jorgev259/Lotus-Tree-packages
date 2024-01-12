@@ -93,7 +93,7 @@ const commands = {
 
       const link = urls[0]
 
-      if (urls.length > 0) {
+      if (link) {
         const checkUrl = await socdb.models.request.findOne({ where: { link } })
         if (checkUrl) return talkChannel.send(`This soundtrack has already been requested: ${link}`)
 

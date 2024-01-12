@@ -2,15 +2,14 @@ import { PermissionsBitField } from 'discord.js'
 import axios from 'axios'
 
 export async function getVGMDB (link) {
-  const url = new URL(link)
-  const id = url.pathname.split('/').slice(-1)
-
   try {
-    const response = await axios.get(
-    `https://api.nemoralni.site/albums/${id}`,
-    { headers: { 'x-api-key': 'i-m-a-pig-i-don-t-fight-for-honor-i-fight-for-a-paycheck' } })
-    return response.data
-  } catch {}
+    if (!isValidUrl(link)) return null
+    const linkId = (new URL(link)).pathname.split('/').slice(-1)[0]
+    const { data } = await axios.get(`https://vgmdb.info/album/${linkId}`, { headers: { 'Content-Type': 'application/json' } })
+    return data
+  } catch {
+    return null
+  }
 }
 
 const isValidUrl = s => {
@@ -26,7 +25,7 @@ async function getCover (link) {
   const data = await getVGMDB(link)
   if (!data) return
 
-  const cover = data.album_cover
+  const cover = data.picture_small || data.picture_full || data.picture_thumb
 
   if (isValidUrl(cover)) return { url: cover }
 }

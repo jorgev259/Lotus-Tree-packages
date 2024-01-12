@@ -1,3 +1,5 @@
+import { PermissionsBitField } from 'discord.js'
+
 const orderCategory = ['user', 'role', 'channel']
 const orderType = ['deny', 'allow']
 
@@ -38,7 +40,7 @@ export const permGet = (sequelize, options) => sequelize.models.perm.findAll(opt
 
 export async function permCheck (command, message, { configFile, sequelize }, overrides = {}) {
   if (command.ownerOnly) return configFile.ownerIds.includes(message.author.id)
-  if (message.member.permissions.has('ADMINISTRATOR')) return true
+  if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return true
 
   const rows = permSort(await permGet(sequelize, { where: { command: command.name, guild: message.guild.id } }))
   if (rows.length === 0) return true

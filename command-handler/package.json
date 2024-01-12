@@ -1,9 +1,8 @@
 {
   "name": "@lotus-tree/command-handler",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "main": "src/index.js",
   "type": "module",
-
   "dependencies": {
     "discord.js": "^14.14.1",
     "sequelize": "^6.6.5"

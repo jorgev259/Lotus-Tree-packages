@@ -7,7 +7,10 @@ const commands = {
   refresh: {
     desc: 'Reposts all open requests.',
     usage: 'refresh',
-    async execute ({ socdb }, { message }) {
+    async execute (globals, { message }) {
+      const { localConfig } = globals
+      const { socdb } = localConfig
+
       const requests = await socdb.models.request.findAll({ where: { state: { [Op.not]: 'complete' } } })
       let request = requests.shift()
 
@@ -22,7 +25,10 @@ const commands = {
 
   pending: {
     desc: 'Shows how many pending requests you have.',
-    async execute ({ sequelize, socdb }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { localConfig, sequelize } = globals
+      const { socdb } = localConfig
+
       const requests = await socdb.models.request.findAll({
         attributes: ['state', [sequelize.fn('COUNT', '*'), 'count']],
         where: { userID: msg.author.id },
@@ -39,7 +45,10 @@ const commands = {
   hold: {
     desc: 'Marks a request as ON HOLD.',
     usage: 'hold [id] [reason]',
-    async execute ({ client, param, socdb, localConfig }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { param, localConfig } = globals
+      const { socdb, guild } = localConfig
+
       if (!param[2]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
@@ -47,14 +56,17 @@ const commands = {
       if (request.state === 'hold') return msg.reply('Request already on hold')
 
       const reason = param.slice(2).join(' ')
-      await holdRequest(client, socdb, localConfig.requestcat.guild, request, reason)
+      await holdRequest(socdb, guild, request, reason)
     }
   },
 
   request: {
     desc: 'Request a soundtrack',
     usage: 'request [url or name]',
-    async execute ({ param, socdb }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { param, localConfig } = globals
+      const { socdb } = localConfig
+
       if (!param[1]) return msg.channel.send('Please provide a url or name')
 
       const donator = msg.member.roles.cache.some(r => r.name === 'Donators')
@@ -107,21 +119,27 @@ const commands = {
   complete: {
     desc: 'Marks a request as completed.',
     usage: 'complete [id]',
-    async execute ({ client, param, socdb, localConfig }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { param, localConfig } = globals
+      const { socdb, guild } = localConfig
+
       if (!param[1]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
       if (!request) return msg.reply('Request not found')
       if (request.state === 'complete') return msg.reply('Request already complete')
 
-      await completeRequest(client, socdb, localConfig.requestcat.guild, request)
+      await completeRequest(socdb, guild, request)
     }
   },
 
   reject: {
     desc: 'Marks a request as rejected',
     usage: 'reject [id] [reason]',
-    async execute ({ client, param, socdb, localConfig }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { param, localConfig } = globals
+      const { socdb, guild } = localConfig
+
       if (!param[2]) return msg.reply('Incomplete command.')
 
       const request = await socdb.models.request.findByPk(param[1])
@@ -129,14 +147,17 @@ const commands = {
 
       const reason = param.slice(2).join(' ')
 
-      await rejectRequest(client, socdb, localConfig.requestcat.guild, request, reason)
+      await rejectRequest(socdb, guild, request, reason)
     }
   },
 
   check: {
     desc: 'Checks for existing requests',
     usage: 'check [url or title]',
-    async execute ({ client, param, socdb }, { message: msg }) {
+    async execute (globals, { message: msg }) {
+      const { param, localConfig } = globals
+      const { socdb } = localConfig
+
       if (!param[1]) return msg.reply('Incomplete command.')
 
       function sendRequests (list) {

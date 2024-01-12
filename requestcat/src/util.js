@@ -81,11 +81,11 @@ export async function checkLockChannel (socdb, guild) {
   const permissions = channel.permissionsFor(membersRole)
 
   if (countPending >= 20 && permissions.has(PermissionsBitField.Flags.SendMessages)) {
-    await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: false })
+    await channel.permissionOverwrites.edit(membersRole, { SendMessages: false })
     await channel.send('Requests closed')
   } else {
     if (countPending < 20 && !permissions.has(PermissionsBitField.Flags.SendMessages)) {
-      await channel.permissionOverwrites.edit(membersRole, { SEND_MESSAGES: true })
+      await channel.permissionOverwrites.edit(membersRole, { SendMessages: true })
       await channel.send(`Ayo ${camperRole}, requests are open`)
     }
   }
@@ -93,15 +93,11 @@ export async function checkLockChannel (socdb, guild) {
 
 export const getPendingCount = socdb => socdb.models.request.count({ where: { state: 'pending', donator: false } })
 
-export async function completeRequest (client, socdb, guildId, request) {
-  const guild = await client.guilds.fetch(guildId)
-
+export async function completeRequest (socdb, guild, request) {
   await socdb.transaction(async transaction => {
     try {
       const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
       await reqMsg.delete()
-    } catch (err) {
-      catchErr(guild, err)
     } finally {
       request.state = 'complete'
       request.message = null
@@ -112,9 +108,7 @@ export async function completeRequest (client, socdb, guildId, request) {
     .catch(err => catchErr(guild, err))
 }
 
-export async function holdRequest (client, socdb, guildId, request, reason) {
-  const guild = await client.guilds.fetch(guildId)
-
+export async function holdRequest (socdb, guild, request, reason) {
   await socdb.transaction(async transaction => {
     const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
 
@@ -129,19 +123,15 @@ export async function holdRequest (client, socdb, guildId, request, reason) {
     .catch(err => catchErr(guild, err))
 }
 
-export async function rejectRequest (client, socdb, guildId, request, reason) {
-  const guild = await client.guilds.fetch(guildId)
-
-  await socdb.transaction(async transaction => {
+export async function rejectRequest (socdb, guild, request, reason) {
+  try {
     const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
     await reqMsg.delete()
     await request.destroy()
-  })
-    .then(async () => {
-      const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
-      await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
+  } finally {
+    const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
+    await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
 
-      await checkLockChannel(socdb, guild)
-    })
-    .catch(err => catchErr(guild, err))
+    await checkLockChannel(socdb, guild)
+  }
 }

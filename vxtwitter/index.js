@@ -1,9 +1,11 @@
 import getUrls from 'get-urls'
+import { GatewayIntentBits } from 'discord.js'
 
 const searchStrings = ['https://twitter.com', 'https://x.com', 'https://t.co']
 
 const vxtwitter = {
   name: 'vxtwitter',
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers],
   events: {
     async messageCreate ({ client }, msg) {
       if (msg.author.id === client.user.id || msg.author.bot) return

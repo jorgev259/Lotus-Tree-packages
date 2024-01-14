@@ -4,6 +4,7 @@ import glob from 'glob'
 import { DataTypes } from 'sequelize'
 import bent from 'bent'
 import axios from 'axios'
+import { GatewayIntentBits, Partials } from 'discord.js'
 
 import { sizes, aliases, builtin } from './info.json'
 
@@ -121,8 +122,8 @@ const fgnotation = {
     name: 'FG Notation',
     value: '[Instructions and source code](https://lotus.chitowarlock.com/fgnotation)\n[Infil\'s Fighting Game Glossary](https://glossary.infil.net)\n[MagicianStuff\'s Fighthing Game notations emotes](https://twitter.com/MagicianStuff/status/1477931054484893697)'
   },
-  intents: ['GUILD_MESSAGES'],
-  partials: ['MESSAGE'],
+  intents: [GatewayIntentBits.GuildMembers],
+  partials: [Partials.Message],
 
   preload: sequelize => {
     sequelize.define('fginput', {

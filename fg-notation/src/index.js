@@ -115,7 +115,7 @@ function isString (x) {
   return Object.prototype.toString.call(x) === '[object String]'
 }
 
-export default {
+const fgnotation = {
   name: 'fg-notation',
   about: {
     name: 'FG Notation',
@@ -300,3 +300,5 @@ function getRandomInt (min, max) {
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
+
+export default fgnotation

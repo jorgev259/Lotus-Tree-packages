@@ -5,7 +5,7 @@ const searchStrings = ['https://twitter.com', 'https://x.com', 'https://t.co']
 const vxtwitter = {
   name: 'vxtwitter',
   events: {
-    messageCreate ({ client }, msg) {
+    async messageCreate ({ client }, msg) {
       if (msg.author.id === client.user.id || msg.author.bot) return
 
       const urls = Array.from(getUrls(msg.content))
@@ -17,17 +17,28 @@ const vxtwitter = {
           content = content.replaceAll(search, 'https://vxtwitter.com')
         }
 
-        const users = Array.from(msg.mentions.users.keys())
-          .filter(snowflake => snowflake !== msg.author.id)
+        const users = Array.from(msg.mentions.members.keys())
+        const messageOptions = { content: `${msg.author}: ${content}`, allowedMentions: { users } }
 
-        msg.channel.send({
-          content: `${msg.author}: ${content}`,
-          allowedMentions: {
-            repliedUser: false,
-            users
-          }
-        })
-          .then(() => msg.delete())
+        async function sendReply () {
+          const channel = await client.channels.fetch(msg.reference.channelId)
+          const parentMessage = await channel.messages.fetch(msg.reference.channelId)
+
+          await parentMessage.reply(messageOptions)
+          msg.delete().catch(() => {})
+        }
+
+        async function sendMessage () {
+          await msg.channel.send(messageOptions)
+          msg.delete().catch(() => {})
+        }
+
+        if (msg.reference?.messageId) {
+          sendReply()
+            .catch(() => sendMessage())
+        } else {
+          sendMessage()
+        }
       }
     }
   }

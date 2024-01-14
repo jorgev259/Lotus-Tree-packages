@@ -26,7 +26,7 @@ jobs:
       folder: 'requestcat'
 
   saucenao:
-    uses: ./.github/workflows/action.yml
+    uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
       folder: 'saucenao'
@@ -36,4 +36,11 @@ jobs:
     secrets: inherit
     with:
       folder: 'reactgatekeep'
+  
+  vxtwitter:
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    with:
+      folder: 'vxtwitter'
+    
 

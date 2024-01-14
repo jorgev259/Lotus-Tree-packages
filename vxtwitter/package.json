@@ -1,12 +1,8 @@
 {
   "name": "@lotus-tree/fxtwitter",
-  "version": "3.0.3",
+  "type": "module",
   "dependencies": {
-    "bufferutil": "^4.0.8",
-    "discord.js": "^14.14.1",
-    "get-urls": "^10.0.0",
-    "utf-8-validate": "^6.0.3",
-    "zlib-sync": "^0.1.9"
+    "get-urls": "^10.0.0"
   },
   "main": "index.js",
   "repository": {
@@ -14,5 +10,5 @@
     "url": "git+https://github.com/jorgev259/lotus-tree-packages.git"
   },
   "author": "jorgev259",
-  "homepage": "https://github.com/jorgev259/Lotus-Tree-packages/tree/main/fxtwitter"
+  "homepage": "https://github.com/jorgev259/Lotus-Tree-packages/tree/main/vxtwitter"
 }

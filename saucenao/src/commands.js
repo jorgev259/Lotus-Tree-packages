@@ -1,4 +1,4 @@
-export default {
+const commands = {
   enablesauce: {
     desc: 'Enables saucebot on the current channel',
     async execute ({ sequelize, config }, { message }) {
@@ -26,3 +26,5 @@ export default {
     }
   }
 }
+
+export default commands

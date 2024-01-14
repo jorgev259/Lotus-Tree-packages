@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize'
-import events from './events'
-import commands from './commands'
+
+import events from './events.js'
+import commands from './commands.js'
 
 export default {
   name: 'saucenao',

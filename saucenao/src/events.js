@@ -24,7 +24,7 @@ function handleFetch (msg, url, score) {
   })
 }
 
-export default {
+const events = {
   async guildCreate ({ sequelize, config }, guild) {
     config[guild.id].saucenao = new Set()
   },
@@ -56,3 +56,5 @@ export default {
     if (urls.size > 0) for (const url of urls) handleFetch(message, url, saucescore)
   }
 }
+
+export default events

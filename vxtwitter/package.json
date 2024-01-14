@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/fxtwitter",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "type": "module",
   "dependencies": {
     "discord.js": "^14.14.1",

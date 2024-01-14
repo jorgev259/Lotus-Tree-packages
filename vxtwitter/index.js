@@ -24,7 +24,7 @@ const vxtwitter = {
 
         async function sendReply () {
           const channel = await client.channels.fetch(msg.reference.channelId)
-          const parentMessage = await channel.messages.fetch(msg.reference.channelId)
+          const parentMessage = await channel.messages.fetch(msg.reference.messageId)
 
           await parentMessage.reply(messageOptions)
           msg.delete().catch(() => {})

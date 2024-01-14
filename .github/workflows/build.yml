@@ -8,7 +8,7 @@ on:
 
 jobs:
   command-handler:
-    uses: ./.github/workflows/new-action.yml
+    uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
       folder: 'command-handler'
@@ -20,7 +20,7 @@ jobs:
       folder: 'fg-notation'
 
   requestcat:
-    uses: ./.github/workflows/new-action.yml
+    uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
       folder: 'requestcat'
@@ -32,7 +32,7 @@ jobs:
       folder: 'saucenao'
 
   reactgatekeep:
-    uses: ./.github/workflows/new-action.yml
+    uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
       folder: 'reactgatekeep'

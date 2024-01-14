@@ -1,4 +1,4 @@
-name: 'Publish package'
+name: Publish package
 on:
   workflow_call:
     inputs:
@@ -18,14 +18,13 @@ jobs:
           filters: |
             folder:
               - './${{ inputs.folder }}/**'
-
       - uses: actions/setup-node@v2
         if: steps.changes.outputs.folder == 'true'
         with:
           node-version: '18'
-  
-      - if: steps.changes.outputs.folder == 'true'
-        shell: bash 
+
+      - shell: bash 
+        if: steps.changes.outputs.folder == 'true'
         working-directory: ./${{ inputs.folder }}
         run: |
           npm install

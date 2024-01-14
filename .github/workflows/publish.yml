@@ -12,16 +12,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            folder:
+              - './${{ inputs.folder }}/**'
+
       - uses: actions/setup-node@v2
+        if: steps.changes.outputs.folder == 'true'
         with:
           node-version: '18'
   
-      - shell: bash 
+      - if: steps.changes.outputs.folder == 'true'
+        shell: bash 
         working-directory: ./${{ inputs.folder }}
         run: |
           npm install
 
       - uses: JS-DevTools/npm-publish@v1
+        if: steps.changes.outputs.folder == 'true'
         with:
           package: ./${{ inputs.folder }}/package.json
           token: ${{ secrets.NPM_TOKEN }}

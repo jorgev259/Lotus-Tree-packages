@@ -5,8 +5,13 @@ import { DataTypes } from 'sequelize'
 import bent from 'bent'
 import axios from 'axios'
 import { GatewayIntentBits, Partials } from 'discord.js'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
 
-import { sizes, aliases, builtin } from './info.json'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const { sizes, aliases, builtin } = JSON.parse(fs.readFileSync(path.join(__dirname, 'info.json')))
 
 const getJSON = bent('json')
 const imgPath = path.join(__dirname, 'img')

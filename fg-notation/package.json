@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/fg-notation",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "main": "src/index.js",
   "type": "module",
   "dependencies": {

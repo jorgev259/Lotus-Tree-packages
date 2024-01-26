@@ -1,16 +1,5 @@
 import { PermissionsBitField } from 'discord.js'
-import axios from 'axios'
-
-export async function getVGMDB (link) {
-  try {
-    if (!isValidUrl(link)) return null
-    const linkId = (new URL(link)).pathname.split('/').slice(-1)[0]
-    const { data } = await axios.get(`https://vgmdb.info/album/${linkId}`, { headers: { 'Content-Type': 'application/json' } })
-    return data
-  } catch {
-    return null
-  }
-}
+import getVGMDB from '@sittingonclouds/vgmdb-parser'
 
 const isValidUrl = s => {
   try {
@@ -22,12 +11,10 @@ const isValidUrl = s => {
 }
 
 async function getCover (link) {
-  const data = await getVGMDB(link)
-  if (!data) return
+  const { coverUrl } = await getVGMDB(link)
+  if (!coverUrl) return
 
-  const cover = data.picture_small || data.picture_full || data.picture_thumb
-
-  if (isValidUrl(cover)) return { url: cover }
+  if (isValidUrl(coverUrl)) return { url: coverUrl }
 }
 
 export async function getEmbed (request) {

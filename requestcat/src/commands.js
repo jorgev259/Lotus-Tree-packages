@@ -1,7 +1,8 @@
 import { Op, fn, col, where } from 'sequelize'
 import getUrls from 'get-urls'
+import getVGMDB from '@sittingonclouds/vgmdb-parser'
 
-import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, getVGMDB, catchErr, getEmbed } from './util.js'
+import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, catchErr, getEmbed } from './util.js'
 
 const commands = {
   refresh: {
@@ -100,7 +101,7 @@ const commands = {
         title = title.replace(link, '')
         if (link.includes('vgmdb.net')) {
           const info = await getVGMDB(link)
-          if (info) title = info.name
+          if (info?.title) title = info.title
         }
       }
 

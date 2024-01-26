@@ -7,20 +7,30 @@ import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLock
 const commands = {
   refresh: {
     desc: 'Reposts all open requests.',
-    usage: 'refresh',
+    usage: 'refresh [requestId] [requestId]',
     async execute (globals, { message }) {
-      const { localConfig } = globals
+      const { localConfig, param } = globals
       const { socdb } = localConfig
 
-      const requests = await socdb.models.request.findAll({ where: { state: { [Op.not]: 'complete' } } })
-      let request = requests.shift()
+      const requestIds = param.slice(1)
+      requestIds.forEach(async requestId => {
+        const request = await socdb.models.request.findByPk(requestId)
+        if (!request || request.state === 'complete') return
 
-      while (request) {
-        if (!request) return
+        const embed = await getEmbed(request)
+        const channels = await message.guild.channels.fetch()
+        const channel = channels.find(c => c.name === 'open-requests')
 
-        await sendEmbed(message, request)
-        request = requests.shift()
-      }
+        const requestMessage = await channel.messages.fetch(request.message)
+
+        if (requestMessage) requestMessage.edit({ embeds: [embed] })
+        else {
+          const sent = await channel.send({ embeds: [embed] })
+          request.message = sent.id
+
+          request.save()
+        }
+      })
     }
   },
 

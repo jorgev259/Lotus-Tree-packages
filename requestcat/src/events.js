@@ -29,6 +29,14 @@ async function startDb (config, localConfig) {
     comments: DataTypes.STRING,
     message: DataTypes.STRING
   })
+  localConfig.requestcat.socdb.define('album', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    vgmdb: DataTypes.STRING
+  })
 
   await localConfig.requestcat.socdb.authenticate()
 }

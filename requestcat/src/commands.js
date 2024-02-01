@@ -186,6 +186,10 @@ const commands = {
       }
 
       const urlSearch = param[1]
+
+      const album = await socdb.models.album.findOne({ where: { vgmdb: urlSearch } })
+      if (album) return await msg.reply(`https://sittingonclouds.net/album/${album.id}`)
+
       const request = await socdb.models.request.findOne({ where: { link: urlSearch } })
       if (request) return await sendRequests([request])
 

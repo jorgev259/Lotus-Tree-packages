@@ -28,8 +28,9 @@ const vxtwitter = {
   name: 'vxtwitter',
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers],
   events: {
-    async messageCreate ({ client }, msg) {
-      if (msg.author.id === client.user.id || msg.author.bot) return
+    async messageCreate ({ client, modules }, msg) {
+      // const enabled = modules.get('vxtwitter').enabled[msg.guild.id]
+      if (/*! enabled/ || */ msg.author.id === client.user.id || msg.author.bot) return
 
       const allUrls = Array.from(getUrls(msg.content))
       const matchingUrls = (await Promise.all(allUrls.map(isVXNeeded)))

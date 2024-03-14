@@ -1,10 +1,12 @@
 {
-    "name": "@lotus-tree/saucenao",
-    "version": "2.0.0",
-    "main": "src/index.js",
-    "dependencies": {
-        "get-urls": "^10.0.0",
-        "saucenao": "https://github.com/jorgev259/saucenao-node",
-        "sequelize": "^6.6.5"
-    }
+  "name": "@lotus-tree/saucenao",
+  "version": "2.0.1",
+  "main": "src/index.js",
+  "type": "module",
+  "dependencies": {
+    "@lotus-tree/command-handler": "^3.0.4",
+    "get-urls": "^10.0.0",
+    "saucenao": "https://github.com/jorgev259/saucenao-node",
+    "sequelize": "^6.6.5"
+  }
 }

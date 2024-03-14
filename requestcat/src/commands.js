@@ -6,7 +6,7 @@ import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLock
 
 const commands = {
   refresh: {
-    desc: 'Reposts all open requests.',
+    desc: 'Adds or updates requests to #open-requests',
     usage: 'refresh [requestId] [requestId]',
     async execute (globals, { message }) {
       const { localConfig, param } = globals

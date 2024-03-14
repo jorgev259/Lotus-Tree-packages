@@ -11,7 +11,7 @@ const isValidUrl = s => {
 }
 
 async function getCover (link) {
-  const { coverUrl } = await getVGMDB(link)
+  const { coverUrl } = await getVGMDB(link) || {}
   if (!coverUrl) return
 
   if (isValidUrl(coverUrl)) return { url: coverUrl }

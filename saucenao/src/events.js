@@ -3,7 +3,7 @@ import getUrls from 'get-urls'
 
 let mySauce
 
-function handleFetch (msg, url, score) {
+function handleFetch(msg, url, score) {
   mySauce(url).then(response => {
     const { json } = response
     const { results = [] } = json
@@ -12,11 +12,11 @@ function handleFetch (msg, url, score) {
 
     if (finalResults.length) {
       msg.channel.send(`Found source: ${finalResults.map(e =>
-          e.data.pixiv_id
-            ? `<https://www.pixiv.net/en/artworks/${e.data.pixiv_id}>`
-            : e.data.ext_urls.map(url => `<${url}>`).join(' - ')
-        ).join(' - ')
-      }`)
+        e.data.pixiv_id
+          ? `<https://www.pixiv.net/en/artworks/${e.data.pixiv_id}>`
+          : e.data.ext_urls.map(url => `<${url}>`).join(' - ')
+      ).join(' - ')
+        }`)
     }
   }, error => {
     console.error('Request encountered an error')
@@ -25,10 +25,10 @@ function handleFetch (msg, url, score) {
 }
 
 const events = {
-  async guildCreate ({ sequelize, config }, guild) {
+  async guildCreate({ sequelize, config }, guild) {
     config[guild.id].saucenao = new Set()
   },
-  async ready ({ sequelize, config, client }) {
+  async ready({ sequelize, config, client }) {
     const guilds = await client.guilds.fetch()
     guilds.forEach(guild => {
       if (!config[guild.id]) config[guild.id] = { saucenao: new Set() }
@@ -45,8 +45,8 @@ const events = {
         })
       })
   },
-  async messageCreate ({ config, client, configFile }, message) {
-    if (!mySauce) mySauce = new SauceNAO(configFile.saucenao)
+  async messageCreate({ config, client, lotusConfig }, message) {
+    if (!mySauce) mySauce = new SauceNAO(lotusConfig.saucenao)
 
     if (!config[message.guild.id].saucenao.has(message.channel.id) || message.author.bot) return
     const saucescore = parseInt(config[message.guild.id].saucescore)

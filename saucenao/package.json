@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/saucenao",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "main": "src/index.js",
   "type": "module",
   "dependencies": {

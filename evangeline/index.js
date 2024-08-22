@@ -5,6 +5,11 @@ module.exports = {
     value: '[Custom bot for cool peeps](https://github.com/jorgev259/Lotus-Tree-packages/tree/main/evangeline)'
   },
   events: {
+    async guildMemberAdd(globals, member){
+      const role = roles.find(r => r.name.toLowerCase().includes('ageless'))
+      member.roles.remove(role)
+    },
+    
     async messageCreate (globals, message) {
       if (!message.channel.name.includes('confirm-age')) return
       // if (message.member.roles.cache.size > 0) return
@@ -14,11 +19,15 @@ module.exports = {
 
       const num = parseInt(numString)
       const roles = await message.guild.roles.fetch()
-      const role = roles.find(r => r.name.toLowerCase().includes('unverified'))
+      const unverifiedRole = roles.find(r => r.name.toLowerCase().includes('unverified'))
+      const agelessRole = roles.find(r => r.name.toLowerCase().includes('ageless'))
 
       if ((num >= 1 && num <= 6) || (num >= 13 && num <= 15)) message.member.kick('Failed age verification')
       else if (num >= 7 && num <= 12) message.member.ban({ reason: 'Failed age verification' })
-      else if (num >= 16) message.member.roles.add(role)
+      else if (num >= 16) {
+        message.member.roles.remove(agelessRole)
+        message.member.roles.add(unverifiedRole)
+      }
 
       message.delete()
     },

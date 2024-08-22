@@ -7,7 +7,7 @@ module.exports = {
   events: {
     async guildMemberAdd(globals, member){
       const role = roles.find(r => r.name.toLowerCase().includes('ageless'))
-      member.roles.remove(role)
+      member.roles.add(role)
     },
     
     async messageCreate (globals, message) {

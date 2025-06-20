@@ -93,7 +93,7 @@ const commands = {
 
       const request = { title: title.trim(), link, userID: msg.author.id, donator, state: 'pending' }
 
-      await socdb.models.request.create(request, { transaction })
+      await socdb.models.request.create(request)
       .then(() => checkLockChannel(socdb, msg.guild))
       .catch(err => catchErr(msg.guild, err))
 

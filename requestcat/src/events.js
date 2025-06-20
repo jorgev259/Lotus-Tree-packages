@@ -1,5 +1,5 @@
 import { Events } from 'discord.js'
-import { Sequelize } from 'sequelize'
+import { Sequelize, DataTypes } from 'sequelize'
 import express from 'express'
 import bodyParser from 'body-parser'
 

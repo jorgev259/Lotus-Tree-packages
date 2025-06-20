@@ -5,7 +5,7 @@ import getVGMDB from '@sittingonclouds/vgmdb-parser'
 import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, catchErr, getEmbed } from './util.js'
 
 const commands = {
-  refresh: {
+/*   refresh: {
     desc: 'Adds or updates requests to #open-requests',
     usage: 'refresh [requestId] [requestId]',
     async execute (globals, { message }) {
@@ -32,7 +32,7 @@ const commands = {
         }
       })
     }
-  },
+  }, */
 
   pending: {
     desc: 'Shows how many pending requests you have.',
@@ -95,6 +95,11 @@ const commands = {
 
           return
         }
+      }
+
+      if(donator){
+        const pending = await socdb.models.request.count({ where: { userID: msg.author.id, state: 'pending' } })
+        if (pending >= 5) return talkChannel.send(`You already reached your pending request limit. Wait until one fulfilled, rejected or put On Hold ${msg.author}`)
       }
 
       let title = param.slice(1).join(' ')

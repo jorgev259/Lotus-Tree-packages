@@ -120,7 +120,7 @@ const commands = {
         }
       }
 
-      const request = { title: title.trim(), link, user: msg.author.tag, userID: msg.author.id, donator, state: 'pending' }
+      const request = { title: title.trim(), link, userID: msg.author.id, donator, state: 'pending' }
 
       socdb.transaction(async transaction => {
         const row = await socdb.models.request.create(request, { transaction })

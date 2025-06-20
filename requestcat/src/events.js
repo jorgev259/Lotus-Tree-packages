@@ -21,7 +21,6 @@ async function startDb (config, localConfig) {
     },
     title: DataTypes.STRING,
     link: DataTypes.STRING,
-    user: DataTypes.STRING,
     userID: DataTypes.STRING,
     state: { type: DataTypes.STRING, allowNull: false },
     donator: { type: DataTypes.BOOLEAN, allowNull: false },

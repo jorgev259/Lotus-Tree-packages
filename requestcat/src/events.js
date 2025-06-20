@@ -1,5 +1,5 @@
 import { Events } from 'discord.js'
-import { Sequelize, DataTypes } from 'sequelize'
+import { Sequelize } from 'sequelize'
 import express from 'express'
 import bodyParser from 'body-parser'
 
@@ -25,8 +25,7 @@ async function startDb (config, localConfig) {
     state: { type: DataTypes.STRING, allowNull: false },
     donator: { type: DataTypes.BOOLEAN, allowNull: false },
     reason: DataTypes.STRING,
-    comments: DataTypes.STRING,
-    message: DataTypes.STRING
+    comments: DataTypes.STRING
   })
   localConfig.requestcat.socdb.define('album', {
     id: {

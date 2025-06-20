@@ -1,57 +1,4 @@
 import { PermissionsBitField } from 'discord.js'
-import getVGMDB from '@sittingonclouds/vgmdb-parser'
-
-const isValidUrl = s => {
-  try {
-    const testUrl = new URL(s)
-    return !!testUrl
-  } catch (err) {
-    return false
-  }
-}
-
-async function getCover (link) {
-  const { coverUrl } = await getVGMDB(link) || {}
-  if (!coverUrl) return
-
-  if (isValidUrl(coverUrl)) return { url: coverUrl }
-}
-
-export async function getEmbed (request) {
-  let image
-  const isHold = request.state === 'hold'
-
-  if (request.link?.includes('vgmdb.net')) image = await getCover(request.link)
-
-  return {
-    fields: [
-      {
-        name: 'Request',
-        value: `${request.title}${request.link ? ` (${request.link})` : ''}${isHold ? ' **(ON HOLD)**' : ''}`
-      },
-      {
-        name: 'Requested by',
-        value: `<@${request.userID}> / ${request.userID}`,
-        inline: true
-      },
-      {
-        name: 'ID',
-        value: request.id.toString(),
-        inline: true
-      }
-    ],
-    color: request.donator ? 0xedcd40 : (isHold ? 0xc20404 : 0x42bfed),
-    image
-  }
-}
-
-async function editEmbed (guild, request) {
-  const channel = guild.channels.cache.find(c => c.name === 'open-requests')
-  const embed = await getEmbed(request)
-
-  const m = await channel.messages.fetch(request.message)
-  await m.edit({ embed })
-}
 
 export function catchErr (guild, err) {
   console.log(err)
@@ -80,16 +27,8 @@ export async function checkLockChannel (socdb, guild) {
 export const getPendingCount = socdb => socdb.models.request.count({ where: { state: 'pending', donator: false } })
 
 export async function completeRequest (socdb, guild, request) {
-  await socdb.transaction(async transaction => {
-    try {
-      const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
-      await reqMsg.delete()
-    } finally {
-      request.state = 'complete'
-      request.message = null
-      await request.save()
-    }
-  })
+  request.state = 'complete'
+  await request.save()
     .then(() => checkLockChannel(socdb, guild))
     .catch(err => catchErr(guild, err))
 }
@@ -102,22 +41,14 @@ export async function holdRequest (socdb, guild, request, reason) {
     request.reason = reason
     await request.save()
     await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been put ON HOLD.\nReason: ${request.reason || 'I made it the fuck up'}`)
-
-    if (request.message) await editEmbed(guild, request)
   })
     .then(() => checkLockChannel(socdb, guild))
     .catch(err => catchErr(guild, err))
 }
 
 export async function rejectRequest (socdb, guild, request, reason) {
-  try {
-    const reqMsg = await guild.channels.cache.find(c => c.name === 'open-requests').messages.fetch(request.message)
-    await reqMsg.delete()
-    await request.destroy()
-  } finally {
-    const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
-    await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
-
-    await checkLockChannel(socdb, guild)
-  }
+  const talkChannel = guild.channels.cache.find(c => c.name === 'request-talk')
+  await request.destroy()
+  await talkChannel.send(`"${request.title}${request.link ? ` (${request.link})` : ''}" from <@${request.userID}> has been rejected.\nReason: ${reason || 'I made it the fuck up'}`)
+  await checkLockChannel(socdb, guild)
 }

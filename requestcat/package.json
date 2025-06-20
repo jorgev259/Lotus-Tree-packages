@@ -1,6 +1,6 @@
 {
   "name": "@lotus-tree/requestcat",
-  "version": "4.4.2",
+  "version": "4.5.0",
   "main": "src/index.js",
   "type": "module",
   "dependencies": {

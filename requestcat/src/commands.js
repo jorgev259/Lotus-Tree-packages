@@ -2,38 +2,9 @@ import { Op, fn, col, where } from 'sequelize'
 import getUrls from 'get-urls'
 import getVGMDB from '@sittingonclouds/vgmdb-parser'
 
-import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, catchErr, getEmbed } from './util.js'
+import { holdRequest, completeRequest, rejectRequest, getPendingCount, checkLockChannel, catchErr } from './util.js'
 
 const commands = {
-/*   refresh: {
-    desc: 'Adds or updates requests to #open-requests',
-    usage: 'refresh [requestId] [requestId]',
-    async execute (globals, { message }) {
-      const { localConfig, param } = globals
-      const { socdb } = localConfig
-
-      const requestIds = param.slice(1)
-      requestIds.forEach(async requestId => {
-        const request = await socdb.models.request.findByPk(requestId)
-        if (!request || request.state === 'complete') return
-
-        const embed = await getEmbed(request)
-        const channels = await message.guild.channels.fetch()
-        const channel = channels.find(c => c.name === 'open-requests')
-
-        const requestMessage = await channel.messages.fetch(request.message)
-
-        if (requestMessage) requestMessage.edit({ embeds: [embed] })
-        else {
-          const sent = await channel.send({ embeds: [embed] })
-          request.message = sent.id
-
-          request.save()
-        }
-      })
-    }
-  }, */
-
   pending: {
     desc: 'Shows how many pending requests you have.',
     async execute (globals, { message: msg }) {
@@ -122,13 +93,11 @@ const commands = {
 
       const request = { title: title.trim(), link, userID: msg.author.id, donator, state: 'pending' }
 
-      socdb.transaction(async transaction => {
-        const row = await socdb.models.request.create(request, { transaction })
-        await sendEmbed(msg, row, transaction)
-        await msg.reply('Request submitted')
-      })
-        .then(() => checkLockChannel(socdb, msg.guild))
-        .catch(err => catchErr(msg.guild, err))
+      await socdb.models.request.create(request, { transaction })
+      .then(() => checkLockChannel(socdb, msg.guild))
+      .catch(err => catchErr(msg.guild, err))
+
+      await msg.reply('Request submitted')
     }
   },
 
@@ -207,11 +176,3 @@ const commands = {
 }
 
 export default commands
-
-async function sendEmbed (msg, request, transaction) {
-  const embed = await getEmbed(request)
-
-  const sent = await msg.guild.channels.cache.find(c => c.name === 'open-requests').send({ embeds: [embed] })
-  request.message = sent.id
-  await request.save({ transaction })
-}

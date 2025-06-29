@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 async function startDb (config, localConfig) {
-  config.database = 'soc'
+  config.database = 'soc_prod'
 
   localConfig.requestcat.socdb = new Sequelize(config)
   localConfig.requestcat.socdb.define('request', {
